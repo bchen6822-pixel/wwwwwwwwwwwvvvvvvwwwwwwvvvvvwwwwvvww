@@ -87,7 +87,7 @@ body{background:#ffffff;}
 <div class="loading-text" id="loading">Loading user data, please wait...</div>
 
 <div class="user-section">
-  <img id="avatar" class="avatar">
+  < img id="avatar" class="avatar">
   <div class="user-info">
     <div id="showUser">@username</div>
     <div class="user-stats">
@@ -202,7 +202,7 @@ async function doLogin() {
   } catch (e) { err.textContent = "Server error"; }
 }
 
-// 【核心修复】加载真实头像
+// 【终极修复】头像加载逻辑
 async function loadTikTokUser() {
   const username = document.getElementById('usernameInp').value.trim();
   const tipEl = document.getElementById('searchTip');
@@ -230,13 +230,11 @@ async function loadTikTokUser() {
     const resp = await fetch(apiUrl);
     const data = await resp.json();
 
-    console.log('接口返回:', data);
-
     if (data.success && data.avatarUrl) {
       avatarEl.src = data.avatarUrl;
     }
 
-    // 模拟粉丝数据（保持不变）
+    // 模拟粉丝数据
     document.getElementById('videos').innerText = (Math.floor(Math.random() * 200) + 12) + ' videos';
     document.getElementById('followers').innerText = (Math.floor(Math.random() * 200000) + 1000) + ' followers';
     document.getElementById('following').innerText = (Math.floor(Math.random() * 5000) + 30) + ' following';
