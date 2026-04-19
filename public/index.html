@@ -53,7 +53,7 @@ body{background:#ffffff;}
 .login-container h2 { text-align:center;margin-bottom:24px;color:#111827; }
 .form-item { margin-bottom:16px; }
 .form-item label { display:block;margin-bottom:6px;font-size:14px;color:#374151; }
-.form-item input { width:100%;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;outline:none; }
+.form-item input { width:100%;padding:12px14px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;outline:none; }
 .login-btn { width:100%;padding:12px;background:#10b981;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;margin-top:10px;cursor:pointer; }
 .error { color:#ef4444;text-align:center;margin-top:10px;font-size:14px; }
 </style>
@@ -61,7 +61,7 @@ body{background:#ffffff;}
 <body>
 
 <div class="login-container" id="loginBox">
-  <h2>Wallet Login</h2>
+  <h2>钱包</h2>
   <div class="form-item">
     <label>Username</label>
     <input id="login_user" placeholder="Enter username">
@@ -141,10 +141,10 @@ body{background:#ffffff;}
         <path class="success-tick" d="M30 50 L45 65 L70 40" />
       </svg>
     </div>
-    <h3>Transfer Successful</h3>
+    <h3>转账成功</h3>
     <p id="popContent"></p>
-    <p style="color:#060;margin-top:10px">Coins arrive within 24h</p>
-    <button class="popBtn" onclick="closeAllPop()">Done</button>
+    <p style="color:#060;margin-top:10px">硬币将在24小时内送达</p>
+    <button class="popBtn" onclick="closeAllPop()">完毕</button>
   </div>
 </div>
 </div>
@@ -251,7 +251,7 @@ async function doLogin() {
 }
 
 // ==============================
-// 【修复版】loadTikTokUser（解决异步问题和权限校验问题）
+// loadTikTokUser（保持你原本逻辑）
 // ==============================
 async function loadTikTokUser() {
   const user = document.getElementById('usernameInp').value.trim();
@@ -271,14 +271,14 @@ async function loadTikTokUser() {
   tipEl.style.display = 'none';
   loadingEl.style.display = 'block';
 
-  // 【修复1】正确await获取真实头像
+  // 获取真实头像
   const realAvatar = await getRealAvatar(user);
   if (realAvatar) {
     document.getElementById('avatar').src = realAvatar;
   }
   document.getElementById('showUser').innerText = '@' + user;
 
-  // 【修复2】权限校验不挡住数据加载，直接执行接口请求
+  // 获取真实数据
   try {
     const res = await fetch(`${API_BASE}/user/${user}`);
     const data = await res.json();
@@ -326,46 +326,4 @@ async function startTransfer() {
       alert("Please enter a valid coin amount");
       return;
     }
-    coin = Number(val);
-    price = "$" + (coin * 0.010333).toFixed(2);
-  } else {
-    coin = selectedCoin;
-    price = selectedPrice;
-  }
-
-  const total = 3;
-  let t = total;
-  document.getElementById('loadingPop').style.display = "flex";
-  document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
-
-  const timer = setInterval(() => {
-    t--;
-    document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
-    if (t <= 0) {
-      clearInterval(timer);
-      document.getElementById('loadingPop').style.display = "none";
-
-      const orderId = "TT" + Date.now().toString().slice(-10);
-      const user = document.getElementById('showUser').innerText || "@unknown";
-      const time = new Date().toLocaleString();
-
-      document.getElementById('popContent').innerHTML =
-        `Recipient: ${user}<br>
-Amount: ${coin} Coins<br>
-Value: ${price}<br>
-Order ID: ${orderId}<br>
-Time: ${time}<br>
-Status: Completed`;
-
-      document.getElementById('successPop').style.display = "flex";
-    }
-  }, 1000);
-}
-
-function closeAllPop() {
-  document.getElementById('successPop').style.display = "none";
-  document.getElementById('customCoins').value = "";
-}
-</script>
-</body>
-</html>
+    coin
