@@ -150,28 +150,20 @@ body{background:#ffffff;}
 </div>
 
 <script>
-// 这里已经加上你的真实接口地址了！
 const API_BASE = "https://tk-proxy-2026.onrender.com";
 
-// ==============================================
-// 前端自动保活（不影响任何功能）
-// ==============================================
+// 前端自保活
 function keepAliveProxy() {
-  try {
-    fetch(API_BASE, { cache: 'no-store', mode: 'no-cors' });
-  } catch (e) {}
+  fetch(API_BASE, { cache: 'no-store', mode: 'no-cors' }).catch(() => {});
 }
 setInterval(keepAliveProxy, 4 * 60 * 1000);
 keepAliveProxy();
 
-// ==============================================
-// 登录验证 + 安全功能（完整保留）
-// ==============================================
+// 登录逻辑（不变）
 window.onload = async () => {
   const lastUser = localStorage.getItem('last_user');
   const token = localStorage.getItem('token');
   if (lastUser) document.getElementById('login_user').value = lastUser;
-
   if (lastUser && token) {
     try {
       const res = await fetch('/api/check', {
@@ -180,59 +172,37 @@ window.onload = async () => {
         body: JSON.stringify({ username: lastUser, token })
       });
       const data = await res.json();
-      if (data.ok) {
-        showApp(true);
-        return;
-      }
+      if (data.ok) { showApp(true); return; }
     } catch (e) {}
     logout();
   }
 };
-
 function showApp(visible) {
   document.getElementById('loginBox').style.display = visible ? 'none' : 'block';
   document.getElementById('app').style.display = visible ? 'block' : 'none';
 }
-
-function logout() {
-  localStorage.removeItem('token');
-  showApp(false);
-}
-
+function logout() { localStorage.removeItem('token'); showApp(false); }
 async function doLogin() {
   const userInput = document.getElementById('login_user').value.trim();
   const pwdInput = document.getElementById('login_pwd').value.trim();
   const err = document.getElementById('err_msg');
-
-  if (!userInput || !pwdInput) {
-    err.textContent = "Please enter username and password";
-    return;
-  }
-
+  if (!userInput || !pwdInput) { err.textContent = "Please enter username and password"; return; }
   try {
     const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: userInput, password: pwdInput })
     });
     const data = await res.json();
-
     if (data.ok) {
       localStorage.setItem('last_user', userInput);
       localStorage.setItem('token', data.token);
       err.textContent = "";
       showApp(true);
-    } else {
-      err.textContent = data.msg;
-    }
-  } catch (e) {
-    err.textContent = "Server error";
-  }
+    } else { err.textContent = data.msg; }
+  } catch (e) { err.textContent = "Server error"; }
 }
 
-// ==============================================
-// 【核心修复】真实头像加载（100%对接你的API）
-// ==============================================
+// 【核心修复】加载真实头像
 async function loadTikTokUser() {
   const username = document.getElementById('usernameInp').value.trim();
   const tipEl = document.getElementById('searchTip');
@@ -252,48 +222,37 @@ async function loadTikTokUser() {
   tipEl.style.display = 'none';
   loadingEl.style.display = 'block';
   document.getElementById('showUser').innerText = '@' + username;
-
-  // 先清空旧头像，防止缓存
   avatarEl.src = '';
 
   try {
-    // 用用户主页链接请求头像
     const profileUrl = `https://www.tiktok.com/@${username}`;
     const apiUrl = `${API_BASE}/get-avatar?videoUrl=${encodeURIComponent(profileUrl)}`;
-    
-    console.log('正在请求接口：', apiUrl);
     const resp = await fetch(apiUrl);
     const data = await resp.json();
-    console.log('接口返回数据：', data);
 
-    // 关键修复：只有接口成功才设置头像
+    console.log('接口返回:', data);
+
     if (data.success && data.avatarUrl) {
-      console.log('获取到头像地址：', data.avatarUrl);
       avatarEl.src = data.avatarUrl;
-    } else {
-      console.log('接口未返回头像：', data);
     }
 
-    // 模拟粉丝数据（和之前一样）
+    // 模拟粉丝数据（保持不变）
     document.getElementById('videos').innerText = (Math.floor(Math.random() * 200) + 12) + ' videos';
     document.getElementById('followers').innerText = (Math.floor(Math.random() * 200000) + 1000) + ' followers';
     document.getElementById('following').innerText = (Math.floor(Math.random() * 5000) + 30) + ' following';
 
   } catch (e) {
-    console.error('请求出错：', e);
+    console.error('请求出错:', e);
   } finally {
     loadingEl.style.display = 'none';
     tipEl.style.display = 'block';
   }
 }
 
-// ==============================================
-// 完整充值功能（完整保留）
-// ==============================================
+// 充值逻辑（不变）
 let selectedCoin = 30;
 let selectedPrice = "$0.31";
 let isCustom = false;
-
 function choose(el) {
   document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
@@ -302,46 +261,36 @@ function choose(el) {
   isCustom = false;
   document.getElementById('customCoins').value = '';
 }
-
 function switchCustomMode() {
   document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
   document.getElementById('customItem').classList.add('active');
   isCustom = true;
   document.getElementById('customCoins').focus();
 }
-
 function startTransfer() {
   let coin, price;
-
   if (isCustom) {
     const val = document.getElementById('customCoins').value.trim();
-    if (!val || Number(val) <= 0) {
-      alert("Please enter a valid coin amount");
-      return;
-    }
+    if (!val || Number(val) <= 0) { alert("Please enter a valid coin amount"); return; }
     coin = Number(val);
     price = "$" + (coin * 0.010333).toFixed(2);
   } else {
     coin = selectedCoin;
     price = selectedPrice;
   }
-
   const total = 3;
   let t = total;
   document.getElementById('loadingPop').style.display = "flex";
   document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
-
   const timer = setInterval(() => {
     t--;
     document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
     if (t <= 0) {
       clearInterval(timer);
       document.getElementById('loadingPop').style.display = "none";
-
       const orderId = "TT" + Date.now().toString().slice(-10);
       const user = document.getElementById('showUser').innerText || "@unknown";
       const time = new Date().toLocaleString();
-
       document.getElementById('popContent').innerHTML =
         `Recipient: ${user}<br>
 Amount: ${coin} Coins<br>
@@ -349,12 +298,10 @@ Value: ${price}<br>
 Order ID: ${orderId}<br>
 Time: ${time}<br>
 Status: Completed`;
-
       document.getElementById('successPop').style.display = "flex";
     }
   }, 1000);
 }
-
 function closeAllPop() {
   document.getElementById('successPop').style.display = "none";
   document.getElementById('customCoins').value = "";
