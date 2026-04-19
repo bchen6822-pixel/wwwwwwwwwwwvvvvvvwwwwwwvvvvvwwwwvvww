@@ -53,7 +53,7 @@ body{background:#ffffff;}
 .login-container h2 { text-align:center;margin-bottom:24px;color:#111827; }
 .form-item { margin-bottom:16px; }
 .form-item label { display:block;margin-bottom:6px;font-size:14px;color:#374151; }
-.form-item input { width:100%;padding:12px14px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;outline:none; }
+.form-item input { width:100%;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;outline:none; }
 .login-btn { width:100%;padding:12px;background:#10b981;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;margin-top:10px;cursor:pointer; }
 .error { color:#ef4444;text-align:center;margin-top:10px;font-size:14px; }
 </style>
@@ -61,7 +61,7 @@ body{background:#ffffff;}
 <body>
 
 <div class="login-container" id="loginBox">
-  <h2>钱包</h2>
+  <h2>Wallet Login</h2>
   <div class="form-item">
     <label>Username</label>
     <input id="login_user" placeholder="Enter username">
@@ -141,10 +141,10 @@ body{background:#ffffff;}
         <path class="success-tick" d="M30 50 L45 65 L70 40" />
       </svg>
     </div>
-    <h3>转账成功</h3>
+    <h3>Transfer Successful</h3>
     <p id="popContent"></p>
-    <p style="color:#060;margin-top:10px">硬币将在24小时内送达</p>
-    <button class="popBtn" onclick="closeAllPop()">完毕</button>
+    <p style="color:#060;margin-top:10px">Coins arrive within 24h</p>
+    <button class="popBtn" onclick="closeAllPop()">Done</button>
   </div>
 </div>
 </div>
@@ -152,7 +152,6 @@ body{background:#ffffff;}
 <script>
 const API_BASE = "https://iiiiiilllllliiiiiiillllllllllllllllliiii.onrender.com";
 
-// 真实头像获取函数
 async function getRealAvatar(username) {
   try {
     const res = await fetch(`https://tk-proxy-2026.onrender.com/get-avatar?username=${username}`);
@@ -164,7 +163,7 @@ async function getRealAvatar(username) {
 }
 
 // ==============================
-// 核心：操作前校验，旧设备直接死
+// 互踢 / 登录校验 完整保留
 // ==============================
 async function checkAuth() {
   const user = localStorage.getItem('last_user');
@@ -184,15 +183,11 @@ async function checkAuth() {
   }
 }
 
-// 退出只清token，保留用户名
 function logout() {
   localStorage.removeItem('token');
   showApp(false);
 }
 
-// ==============================
-// 自动登录（本机有效，别人打开不会登录）
-// ==============================
 window.onload = async () => {
   const savedUser = localStorage.getItem('last_user');
   const token = localStorage.getItem('token');
@@ -216,9 +211,6 @@ function showApp(visible) {
   document.getElementById('app').style.display = visible ? 'block' : 'none';
 }
 
-// ==============================
-// 登录：后登录永远覆盖前面
-// ==============================
 async function doLogin() {
   const userInput = document.getElementById('login_user').value.trim();
   const pwdInput = document.getElementById('login_pwd').value.trim();
@@ -250,9 +242,6 @@ async function doLogin() {
   }
 }
 
-// ==============================
-// loadTikTokUser（保持你原本逻辑）
-// ==============================
 async function loadTikTokUser() {
   const user = document.getElementById('usernameInp').value.trim();
   const tipEl = document.getElementById('searchTip');
@@ -271,14 +260,12 @@ async function loadTikTokUser() {
   tipEl.style.display = 'none';
   loadingEl.style.display = 'block';
 
-  // 获取真实头像
   const realAvatar = await getRealAvatar(user);
   if (realAvatar) {
     document.getElementById('avatar').src = realAvatar;
   }
   document.getElementById('showUser').innerText = '@' + user;
 
-  // 获取真实数据
   try {
     const res = await fetch(`${API_BASE}/user/${user}`);
     const data = await res.json();
@@ -287,9 +274,7 @@ async function loadTikTokUser() {
       document.getElementById('followers').innerText = data.followers + ' followers';
       document.getElementById('following').innerText = data.following + ' following';
     }
-  } catch (e) {
-    console.error('数据加载失败', e);
-  }
+  } catch (e) {}
 
   loadingEl.style.display = 'none';
   tipEl.style.display = 'block';
@@ -326,4 +311,59 @@ async function startTransfer() {
       alert("Please enter a valid coin amount");
       return;
     }
-    coin
+    coin = Number(val);
+    price = "$" + (coin * 0.010333).toFixed(2);
+  } else {
+    coin = selectedCoin;
+    price = selectedPrice;
+  }
+
+  const total = 3;
+  let t = total;
+  document.getElementById('loadingPop').style.display = "flex";
+  document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
+
+  const timer = setInterval(() => {
+    t--;
+    document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
+    if (t <= 0) {
+      clearInterval(timer);
+      document.getElementById('loadingPop').style.display = "none";
+
+      const orderId = "TT" + Date.now().toString().slice(-10);
+      const user = document.getElementById('showUser').innerText || "@unknown";
+      const time = new Date().toLocaleString();
+
+      document.getElementById('popContent').innerHTML =
+        `Recipient: ${user}<br>
+Amount: ${coin} Coins<br>
+Value: ${price}<br>
+Order ID: ${orderId}<br>
+Time: ${time}<br>
+Status: Completed`;
+
+      document.getElementById('successPop').style.display = "flex";
+    }
+  }, 1000);
+}
+
+// ==============================
+// 点击 Done 自动清空 TikTok ID
+// 其他全部保留不动
+// ==============================
+function closeAllPop() {
+  document.getElementById('successPop').style.display = "none";
+  document.getElementById('customCoins').value = "";
+
+  // 自动清空用户名输入框
+  document.getElementById('usernameInp').value = "";
+  // 同时清空用户展示信息，恢复原样
+  document.getElementById('avatar').src = '';
+  document.getElementById('showUser').innerText = '@username';
+  document.getElementById('videos').innerText = '0 videos';
+  document.getElementById('followers').innerText = '0 followers';
+  document.getElementById('following').innerText = '0 following';
+}
+</script>
+</body>
+</html>
