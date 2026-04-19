@@ -30,21 +30,25 @@ button{background:#10b981;color:white;border:none;font-weight:bold;cursor:pointe
   cursor:pointer;
   margin:2px;
 }
-#logoutBtn{
-  float:right;
-  background:#6b7280;
-  color:#fff;
-  padding:6px 12px;
-  border-radius:6px;
-  border:none;
-  cursor:pointer;
-  font-size:14px;
+/* 缩小退出按钮 */
+.logout-wrap {
+  text-align: right;
+  margin-bottom: 10px;
+}
+#logoutBtn {
+  background: #6b7280;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  width: auto;
 }
 </style>
 </head>
 <body>
 
-<!-- 登录模块，登录后会自动隐藏 -->
 <div class="box" id="loginBox">
   <h2>管理员登录</h2>
   <input id="admin_user" placeholder="管理员账号"><br>
@@ -53,16 +57,23 @@ button{background:#10b981;color:white;border:none;font-weight:bold;cursor:pointe
 </div>
 
 <div id="adminPanel" style="display:none;">
-  <div style="text-align:right;margin-bottom:10px;">
+  <div class="logout-wrap">
     <button id="logoutBtn" onclick="adminLogout()">退出登录</button>
   </div>
 
-  <!-- 修改管理员账号密码模块 -->
   <div class="box">
     <h2>修改管理员账号密码</h2>
     <input id="new_admin_user" placeholder="新管理员账号">
     <input id="new_admin_pwd" type="password" placeholder="新管理员密码">
     <button class="gray" onclick="updateAdminUserPwd()">保存修改</button>
+  </div>
+
+  <!-- 新增：单独给用户设置到期时间入口 -->
+  <div class="box">
+    <h2>设置用户有效期</h2>
+    <input id="editUser" placeholder="要修改的用户名">
+    <input id="editDays" type="number" placeholder="新增有效天数">
+    <button class="gray" onclick="editUserExpire()">设置到期时间</button>
   </div>
 
   <div class="box">
@@ -93,7 +104,6 @@ button{background:#10b981;color:white;border:none;font-weight:bold;cursor:pointe
 let all = [];
 let autoRefreshTimer;
 
-// 刷新自动登录
 window.onload = function(){
   const adminToken = localStorage.getItem('admin_token');
   if(adminToken){
@@ -103,7 +113,7 @@ window.onload = function(){
   }
 }
 
-// 管理员登录
+// 登录
 async function adminLogin() {
   const user = document.getElementById('admin_user').value;
   const pwd = document.getElementById('admin_pwd').value;
@@ -114,7 +124,6 @@ async function adminLogin() {
   const d = await r.json();
   if (d.ok) {
     localStorage.setItem('admin_token', 'logged');
-    // 登录成功，隐藏登录框
     document.getElementById('loginBox').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
     startAutoRefresh();
@@ -131,7 +140,7 @@ function adminLogout(){
   document.getElementById('adminPanel').style.display = 'none';
 }
 
-// 修改管理员账号+密码
+// 修改管理员账号密码（修复可用）
 async function updateAdminUserPwd(){
   const newUser = document.getElementById('new_admin_user').value.trim();
   const newPwd = document.getElementById('new_admin_pwd').value.trim();
@@ -139,14 +148,10 @@ async function updateAdminUserPwd(){
     alert('请输入新账号或新密码');
     return;
   }
-  const body = {};
-  if(newUser) body.newUser = newUser;
-  if(newPwd) body.newPwd = newPwd;
-  
   const res = await fetch('/api/admin/set-user-pwd',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(body)
+    body:JSON.stringify({ newUser, newPwd })
   });
   const d = await res.json();
   if(d.ok){
@@ -154,11 +159,33 @@ async function updateAdminUserPwd(){
     document.getElementById('new_admin_user').value = '';
     document.getElementById('new_admin_pwd').value = '';
   }else{
-    alert('修改失败：'+d.msg);
+    alert('修改失败：'+ (d.msg || ''));
   }
 }
 
-// 一键复制：账号：xxx，密码：xxx
+// 新增：修改用户到期天数（入口补上）
+async function editUserExpire(){
+  const user = document.getElementById('editUser').value.trim();
+  const days = document.getElementById('editDays').value.trim();
+  if(!user || !days){
+    alert('请输入用户名和天数');
+    return;
+  }
+  const res = await fetch('/api/admin/set-expire',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ username:user, days:Number(days) })
+  });
+  const d = await res.json();
+  if(d.ok){
+    alert('设置成功');
+    loadList();
+  }else{
+    alert('失败：'+d.msg);
+  }
+}
+
+// 复制
 function copyUser(username, password){
   const text = `账号：${username}，密码：${password}`;
   const input = document.createElement('input');
@@ -170,6 +197,7 @@ function copyUser(username, password){
   alert('已复制：' + text);
 }
 
+// 列表
 async function loadList() {
   try {
     const r = await fetch('/api/admin/list');
@@ -181,57 +209,43 @@ async function loadList() {
 function renderList() {
   const kw = document.getElementById('search').value.toLowerCase();
   const f = all.filter(x => x.username.toLowerCase().includes(kw));
-
   const html = `
   <table class="table">
-    <tr>
-      <th>账号</th>
-      <th>密码</th>
-      <th>在线状态</th>
-      <th>创建时间</th>
-      <th>到期时间</th>
-      <th>账号状态</th>
-      <th>操作</th>
-    </tr>
+    <tr><th>账号</th><th>密码</th><th>在线</th><th>创建时间</th><th>到期时间</th><th>状态</th><th>操作</th></tr>
     ${f.map(x => `
     <tr>
       <td>${x.username}</td>
       <td>${x.password}</td>
-      <td class="${x.online ? 'online' : 'offline'}">${x.online ? '在线' : '离线'}</td>
+      <td class="${x.online?'online':'offline'}">${x.online?'在线':'离线'}</td>
       <td>${new Date(x.createdAt).toLocaleString()}</td>
-      <td>${x.expireAt ? new Date(x.expireAt).toLocaleString() : '永久'}</td>
-      <td>${x.enabled ? '启用' : '禁用'}</td>
+      <td>${x.expireAt?new Date(x.expireAt).toLocaleString():'永久'}</td>
+      <td>${x.enabled?'启用':'禁用'}</td>
       <td>
-        <button class="copy-btn" onclick="copyUser('${x.username}','${x.password}')">复制账号密码</button>
-        <button style="padding:4px 8px;margin:2px;font-size:12px" onclick="toggle('${x.username}',${!x.enabled})">${x.enabled?'禁用':'启用'}</button>
-        <button class="red" style="padding:4px 8px;margin:2px;font-size:12px" onclick="del('${x.username}')">删除</button>
+        <button class="copy-btn" onclick="copyUser('${x.username}','${x.password}')">复制</button>
+        <button style="padding:4px 8px;font-size:12px" onclick="toggle('${x.username}',${!x.enabled})">${x.enabled?'禁用':'启用'}</button>
+        <button class="red" style="padding:4px 8px;font-size:12px" onclick="del('${x.username}')">删除</button>
       </td>
-    </tr>
-    `).join('')}
+    </tr>`).join('')}
   </table>`;
-
   document.getElementById('listWrap').innerHTML = html;
 }
 
-// 5秒自动刷新
+// 自动刷新
 function startAutoRefresh() {
   loadList();
   clearInterval(autoRefreshTimer);
-  autoRefreshTimer = setInterval(() => {
-    loadList();
-  }, 5000);
+  autoRefreshTimer = setInterval(loadList, 5000);
 }
 
+// 单个添加
 async function addSingleUser() {
   const user = document.getElementById('singleUser').value.trim();
   const pwd = document.getElementById('singlePwd').value.trim();
   const days = Number(document.getElementById('singleExpireDays').value) || 0;
   if (!user || !pwd) { alert('请输入用户名和密码'); return; }
-
-  const lines = `${user} ${pwd}`;
   const r = await fetch('/api/admin/batch', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ lines, days })
+    body: JSON.stringify({ lines:`${user} ${pwd}`, days })
   });
   const d = await r.json();
   alert(`成功：${d.success} 个，已存在：${d.exist} 个`);
@@ -247,8 +261,7 @@ async function batchAdd(){
   const days = Number(document.getElementById('expireDays').value) || 0;
   if(!lines){ alert('请输入内容'); return; }
   const res = await fetch('/api/admin/batch',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
+    method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({ lines, days })
   });
   const d = await res.json();
@@ -260,9 +273,8 @@ async function batchAdd(){
 
 // 启用禁用
 async function toggle(username, enabled){
-  const res = await fetch('/api/admin/toggle',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
+  await fetch('/api/admin/toggle',{
+    method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({ username, enabled })
   });
   loadList();
@@ -271,9 +283,8 @@ async function toggle(username, enabled){
 // 删除
 async function del(username){
   if(!confirm('确定删除？')) return;
-  const res = await fetch('/api/admin/delete',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
+  await fetch('/api/admin/delete',{
+    method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({ username })
   });
   loadList();
