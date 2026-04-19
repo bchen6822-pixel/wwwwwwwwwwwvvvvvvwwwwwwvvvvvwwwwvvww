@@ -30,20 +30,44 @@ button{background:#10b981;color:white;border:none;font-weight:bold;cursor:pointe
   cursor:pointer;
   margin:2px;
 }
-/* 缩小退出按钮 */
-.logout-wrap {
-  text-align: right;
-  margin-bottom: 10px;
+
+/* 右上角小按钮组 */
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
 }
-#logoutBtn {
+.small-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 6px;
   background: #6b7280;
   color: #fff;
-  padding: 5px 10px;
-  border-radius: 6px;
   border: none;
   cursor: pointer;
-  font-size: 12px;
   width: auto;
+}
+
+/* 弹窗遮罩 + 弹窗 */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal.show {
+  display: flex;
+}
+.modal-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 360px;
 }
 </style>
 </head>
@@ -57,18 +81,24 @@ button{background:#10b981;color:white;border:none;font-weight:bold;cursor:pointe
 </div>
 
 <div id="adminPanel" style="display:none;">
-  <div class="logout-wrap">
-    <button id="logoutBtn" onclick="adminLogout()">退出登录</button>
+
+  <div class="top-bar">
+    <button class="small-btn" onclick="showModal()">修改管理员账号</button>
+    <button class="small-btn" onclick="adminLogout()">退出登录</button>
   </div>
 
-  <div class="box">
-    <h2>修改管理员账号密码</h2>
-    <input id="new_admin_user" placeholder="新管理员账号">
-    <input id="new_admin_pwd" type="password" placeholder="新管理员密码">
-    <button class="gray" onclick="updateAdminUserPwd()">保存修改</button>
+  <!-- 修改管理员账号密码 弹窗 -->
+  <div class="modal" id="editModal">
+    <div class="modal-box">
+      <h3>修改管理员账号密码</h3>
+      <input id="new_admin_user" placeholder="新管理员账号（不修改可留空）">
+      <input id="new_admin_pwd" type="password" placeholder="新管理员密码（不修改可留空）">
+      <button onclick="updateAdminUserPwd()">保存</button>
+      <button class="gray" onclick="hideModal()">取消</button>
+    </div>
   </div>
 
-  <!-- 新增：单独给用户设置到期时间入口 -->
+  <!-- 设置用户有效期 -->
   <div class="box">
     <h2>设置用户有效期</h2>
     <input id="editUser" placeholder="要修改的用户名">
@@ -113,6 +143,14 @@ window.onload = function(){
   }
 }
 
+// 弹窗控制
+function showModal(){
+  document.getElementById('editModal').classList.add('show');
+}
+function hideModal(){
+  document.getElementById('editModal').classList.remove('show');
+}
+
 // 登录
 async function adminLogin() {
   const user = document.getElementById('admin_user').value;
@@ -132,7 +170,7 @@ async function adminLogin() {
   }
 }
 
-// 退出登录
+// 退出
 function adminLogout(){
   localStorage.removeItem('admin_token');
   clearInterval(autoRefreshTimer);
@@ -140,7 +178,7 @@ function adminLogout(){
   document.getElementById('adminPanel').style.display = 'none';
 }
 
-// 修改管理员账号密码（修复可用）
+// 修改管理员账号密码
 async function updateAdminUserPwd(){
   const newUser = document.getElementById('new_admin_user').value.trim();
   const newPwd = document.getElementById('new_admin_pwd').value.trim();
@@ -148,40 +186,58 @@ async function updateAdminUserPwd(){
     alert('请输入新账号或新密码');
     return;
   }
-  const res = await fetch('/api/admin/set-user-pwd',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ newUser, newPwd })
-  });
-  const d = await res.json();
-  if(d.ok){
-    alert('管理员账号密码修改成功！');
-    document.getElementById('new_admin_user').value = '';
-    document.getElementById('new_admin_pwd').value = '';
-  }else{
-    alert('修改失败：'+ (d.msg || ''));
+  try {
+    const res = await fetch('/api/admin/set-user-pwd',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ newUser, newPwd })
+    });
+    const d = await res.json();
+    if(d.ok){
+      alert('修改成功！');
+      hideModal();
+      document.getElementById('new_admin_user').value = '';
+      document.getElementById('new_admin_pwd').value = '';
+    }else{
+      alert('修改失败：'+(d.msg||''));
+    }
+  }catch(e){
+    alert('请求失败');
   }
 }
 
-// 新增：修改用户到期天数（入口补上）
+// ========== 修复：设置用户有效期 ==========
 async function editUserExpire(){
   const user = document.getElementById('editUser').value.trim();
   const days = document.getElementById('editDays').value.trim();
-  if(!user || !days){
-    alert('请输入用户名和天数');
+
+  if(!user){
+    alert('请输入要修改的用户名');
     return;
   }
-  const res = await fetch('/api/admin/set-expire',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ username:user, days:Number(days) })
-  });
-  const d = await res.json();
-  if(d.ok){
-    alert('设置成功');
-    loadList();
-  }else{
-    alert('失败：'+d.msg);
+  if(!days || isNaN(days) || Number(days) < 0){
+    alert('请输入有效的天数');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/admin/set-expire',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        username: user,
+        days: Number(days)
+      })
+    });
+    const d = await res.json();
+    if(d.ok){
+      alert('有效期设置成功！');
+      loadList();
+    }else{
+      alert('设置失败：'+(d.msg||''));
+    }
+  }catch(e){
+    alert('网络错误，请求失败');
   }
 }
 
