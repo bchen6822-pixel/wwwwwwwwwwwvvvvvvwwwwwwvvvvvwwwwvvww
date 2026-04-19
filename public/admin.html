@@ -30,6 +30,16 @@ button{background:#10b981;color:white;border:none;font-weight:bold;cursor:pointe
   cursor:pointer;
   margin:2px;
 }
+#logoutBtn{
+  float:right;
+  background:#6b7280;
+  color:#fff;
+  padding:6px 12px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  font-size:14px;
+}
 </style>
 </head>
 <body>
@@ -43,6 +53,10 @@ button{background:#10b981;color:white;border:none;font-weight:bold;cursor:pointe
 </div>
 
 <div id="adminPanel" style="display:none;">
+  <div style="text-align:right;margin-bottom:10px;">
+    <button id="logoutBtn" onclick="adminLogout()">退出登录</button>
+  </div>
+
   <!-- 修改管理员账号密码模块 -->
   <div class="box">
     <h2>修改管理员账号密码</h2>
@@ -107,6 +121,14 @@ async function adminLogin() {
   } else {
     alert('登录失败');
   }
+}
+
+// 退出登录
+function adminLogout(){
+  localStorage.removeItem('admin_token');
+  clearInterval(autoRefreshTimer);
+  document.getElementById('loginBox').style.display = 'block';
+  document.getElementById('adminPanel').style.display = 'none';
 }
 
 // 修改管理员账号+密码
