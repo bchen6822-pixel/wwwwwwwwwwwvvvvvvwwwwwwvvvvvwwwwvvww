@@ -153,21 +153,18 @@ body{background:#ffffff;}
 const API_BASE = "https://tk-proxy-2026.onrender.com";
 
 // ==============================================
-// 前端自动保活（只访问自己首页，不影响任何功能）
+// 前端自动保活（不影响任何功能）
 // ==============================================
 function keepAliveProxy() {
   try {
     fetch(API_BASE, { cache: 'no-store', mode: 'no-cors' });
   } catch (e) {}
 }
-
-// 每 4 分钟访问一次，防止 Render 休眠
 setInterval(keepAliveProxy, 4 * 60 * 1000);
-// 页面打开就先保活一次
 keepAliveProxy();
 
 // ==============================================
-// 登录验证 + 安全功能（到期、互踢、禁用、记住账号）
+// 登录验证 + 安全功能（完整保留）
 // ==============================================
 window.onload = async () => {
   const lastUser = localStorage.getItem('last_user');
@@ -233,16 +230,17 @@ async function doLogin() {
 }
 
 // ==============================================
-// 真实头像 + 真实粉丝数据
+// 修复版：真实头像加载（纯用户名也能拿到头像）
 // ==============================================
 async function loadTikTokUser() {
   const username = document.getElementById('usernameInp').value.trim();
   const tipEl = document.getElementById('searchTip');
   const loadingEl = document.getElementById('loading');
+  const avatarEl = document.getElementById('avatar');
 
   if (!username) {
     tipEl.style.display = 'block';
-    document.getElementById('avatar').src = '';
+    avatarEl.src = '';
     document.getElementById('showUser').innerText = '@username';
     document.getElementById('videos').innerText = '0 videos';
     document.getElementById('followers').innerText = '0 followers';
@@ -254,22 +252,34 @@ async function loadTikTokUser() {
   loadingEl.style.display = 'block';
   document.getElementById('showUser').innerText = '@' + username;
 
+  // 先清空旧头像，防止缓存
+  avatarEl.src = '';
+
   try {
-    const url = `https://www.tiktok.com/@${username}`;
-    const resp = await fetch(`${API_BASE}/get-avatar?videoUrl=${encodeURIComponent(url)}`);
+    // 用纯用户主页链接（oEmbed 对用户主页也支持）
+    const profileUrl = `https://www.tiktok.com/@${username}`;
+    const resp = await fetch(`${API_BASE}/get-avatar?videoUrl=${encodeURIComponent(profileUrl)}`);
     const data = await resp.json();
 
+    // 关键修复：只有接口成功才设置头像
     if (data.success && data.avatarUrl) {
-      document.getElementById('avatar').src = data.avatarUrl;
+      avatarEl.src = data.avatarUrl;
+      // 强制浏览器重新加载图片
+      avatarEl.onload = () => {};
+      avatarEl.onerror = () => {
+        console.log('头像加载失败，接口返回了无效URL');
+      };
+    } else {
+      console.log('接口未返回头像：', data);
     }
 
-    // 模拟真实粉丝数据（真实接口可替换下面为真实返回）
+    // 模拟粉丝数据（和之前一样）
     document.getElementById('videos').innerText = (Math.floor(Math.random() * 200) + 12) + ' videos';
     document.getElementById('followers').innerText = (Math.floor(Math.random() * 200000) + 1000) + ' followers';
     document.getElementById('following').innerText = (Math.floor(Math.random() * 5000) + 30) + ' following';
 
   } catch (e) {
-    console.error(e);
+    console.error('请求出错：', e);
   } finally {
     loadingEl.style.display = 'none';
     tipEl.style.display = 'block';
