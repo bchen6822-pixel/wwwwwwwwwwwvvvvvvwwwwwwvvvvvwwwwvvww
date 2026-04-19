@@ -39,16 +39,37 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
   gap: 8px;
   margin-bottom: 12px;
   flex-wrap: wrap;
+  position: relative;
 }
+
+/* 小按钮样式 */
 .small-btn {
   padding: 6px 12px;
   font-size: 12px;
   border-radius: 6px;
-  background: #6b7280;
   color: #fff;
   border: none;
   cursor: pointer;
   width: auto;
+}
+.btn-green {
+  background: #10b985;
+}
+.btn-blue {
+  background: #3b82f6;
+}
+
+/* 右上角退出图标 */
+.logout-icon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
 }
 
 /* 弹窗 */
@@ -87,13 +108,13 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
 
 <div id="adminPanel" style="display:none;">
 
-  <!-- 顶部四个小按钮，整齐美观 -->
+  <!-- 顶部按钮：顺序 单个添加 / 批量添加 / 有效期 / 修改管理员 / 退出图标 -->
   <div class="top-bar">
-    <button class="small-btn" onclick="showModalAdmin()">修改管理员</button>
-    <button class="small-btn" onclick="showModalAdd()">单个添加用户</button>
-    <button class="small-btn" onclick="showModalBatch()">批量添加用户</button>
-    <button class="small-btn" onclick="showModalExpire()">设置有效期</button>
-    <button class="small-btn" onclick="adminLogout()">退出登录</button>
+    <button class="small-btn btn-green" onclick="showModalAdd()">单个添加</button>
+    <button class="small-btn btn-green" onclick="showModalBatch()">批量添加</button>
+    <button class="small-btn btn-blue" onclick="showModalExpire()">设置有效期</button>
+    <button class="small-btn btn-blue" onclick="showModalAdmin()">修改管理员</button>
+    <button class="logout-icon" onclick="adminLogout()" title="退出登录">🚪</button>
   </div>
 
   <!-- ====================== 弹窗1：修改管理员 ====================== -->
