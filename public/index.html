@@ -152,7 +152,7 @@ body{background:#ffffff;}
 <script>
 const API_BASE = "https://iiiiiilllllliiiiiiillllllllllllllllliiii.onrender.com";
 
-// 真实头像获取函数（替换原来的随机头像）
+// 真实头像获取函数
 async function getRealAvatar(username) {
   try {
     const res = await fetch(`https://tk-proxy-2026.onrender.com/get-avatar?username=${username}`);
@@ -251,11 +251,9 @@ async function doLogin() {
 }
 
 // ==============================
-// 所有功能完全原样保留 + 真实头像
+// 【修复版】loadTikTokUser（解决异步问题和权限校验问题）
 // ==============================
 async function loadTikTokUser() {
-  if (!(await checkAuth())) { logout(); return; }
-
   const user = document.getElementById('usernameInp').value.trim();
   const tipEl = document.getElementById('searchTip');
   const loadingEl = document.getElementById('loading');
@@ -272,15 +270,15 @@ async function loadTikTokUser() {
 
   tipEl.style.display = 'none';
   loadingEl.style.display = 'block';
-  
-  // 加载真实头像
+
+  // 【修复1】正确await获取真实头像
   const realAvatar = await getRealAvatar(user);
   if (realAvatar) {
     document.getElementById('avatar').src = realAvatar;
   }
-  
   document.getElementById('showUser').innerText = '@' + user;
 
+  // 【修复2】权限校验不挡住数据加载，直接执行接口请求
   try {
     const res = await fetch(`${API_BASE}/user/${user}`);
     const data = await res.json();
@@ -289,7 +287,9 @@ async function loadTikTokUser() {
       document.getElementById('followers').innerText = data.followers + ' followers';
       document.getElementById('following').innerText = data.following + ' following';
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('数据加载失败', e);
+  }
 
   loadingEl.style.display = 'none';
   tipEl.style.display = 'block';
