@@ -15,6 +15,12 @@ if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify([], null, 2));
 }
 
+// 定义管理员账号（你原来的 admin/admin123）
+let admin = {
+  user: "admin",
+  pwd: "admin123"
+};
+
 function readDB() {
   return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 }
@@ -92,7 +98,7 @@ app.post('/api/check', (req, res) => {
 // ------------------------------
 app.post('/api/admin/login', (req, res) => {
   const { user, pwd } = req.body;
-  if (user === 'admin' && pwd === 'admin123') {
+  if (user === admin.user && pwd === admin.pwd) {
     res.json({ ok: true });
   } else {
     res.json({ ok: false });
@@ -159,19 +165,24 @@ app.post('/api/admin/batch', (req, res) => {
   res.json({ ok: true, success, exist });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Running on ${PORT}`));
-// 修改管理员账号密码
+// ------------------------------
+// 【新增】修改管理员账号密码
+// ------------------------------
 app.post('/api/admin/set-user-pwd', (req, res) => {
   const { newUser, newPwd } = req.body;
   if (newUser) admin.user = newUser;
   if (newPwd) admin.pwd = newPwd;
   res.json({ ok: true });
 });
-// 设置用户有效期
+
+// ------------------------------
+// 【新增】设置用户有效期（适配你的db.json）
+// ------------------------------
 app.post('/api/admin/set-expire', (req, res) => {
   const { username, days } = req.body;
-  const user = users.find(u => u.username === username);
+  const db = readDB();
+  const user = db.find(u => u.username === username);
+
   if (!user) {
     return res.json({ ok: false, msg: "用户不存在" });
   }
@@ -179,9 +190,14 @@ app.post('/api/admin/set-expire', (req, res) => {
   if (days <= 0) {
     user.expireAt = null;
   } else {
-    user.expireAt = Date.now() + days * 86400 * 1000;
+    // 注意：你的数据库存的是 ISO 字符串，要和其他接口保持一致
+    user.expireAt = new Date(Date.now() + days * 86400 * 1000).toISOString();
   }
 
+  writeDB(db);
   res.json({ ok: true });
 });
-      
+
+// 把 app.listen 放到最后！
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Running on ${PORT}`));
