@@ -33,14 +33,16 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
   margin:2px;
 }
 
-/* 关键改动：给 top-bar 留出右侧空间，让按钮不被挡住 */
+/* 关键调整：给 top-bar 预留足够右侧空间，让按钮换行也不影响 */
 .top-bar {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
   flex-wrap: wrap;
   position: relative;
-  padding-right: 30px; /* 给 × 按钮预留位置 */
+  /* 给 × 按钮留出足够空间，同时不影响换行 */
+  padding-right: 40px;
+  min-height: 36px;
 }
 .small-btn {
   padding: 6px 12px;
@@ -54,7 +56,7 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
 .btn-green { background: #10b985; }
 .btn-blue  { background: #3b82f6; }
 
-/* 退出按钮，移到最右侧，不压任何按钮 */
+/* 退出按钮：固定在你圈的位置，和顶部按钮栏同一行 */
 .logout-btn {
   position: absolute;
   right: 0;
