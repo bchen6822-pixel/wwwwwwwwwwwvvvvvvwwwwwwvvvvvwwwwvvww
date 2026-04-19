@@ -198,11 +198,11 @@ async function doLogin() {
       localStorage.setItem('token', data.token);
       err.textContent = "";
       showApp(true);
-    } else { err.textContent = data.msg; }
+    } else { err.textContent = data.error || "Login failed"; }
   } catch (e) { err.textContent = "Server error"; }
 }
 
-// 【终极修复】头像加载逻辑
+// 【已修改完成的头像加载逻辑】
 async function loadTikTokUser() {
   const username = document.getElementById('usernameInp').value.trim();
   const tipEl = document.getElementById('searchTip');
@@ -225,13 +225,15 @@ async function loadTikTokUser() {
   avatarEl.src = '';
 
   try {
-    const profileUrl = `https://www.tiktok.com/@${username}`;
-    const apiUrl = `${API_BASE}/get-avatar?videoUrl=${encodeURIComponent(profileUrl)}`;
+    // 调用新接口，直接传 username
+    const apiUrl = `${API_BASE}/get-avatar?username=${username}`;
     const resp = await fetch(apiUrl);
     const data = await resp.json();
 
     if (data.success && data.avatarUrl) {
       avatarEl.src = data.avatarUrl;
+    } else {
+      console.error('获取头像失败', data);
     }
 
     // 模拟粉丝数据
@@ -269,7 +271,7 @@ function startTransfer() {
   let coin, price;
   if (isCustom) {
     const val = document.getElementById('customCoins').value.trim();
-    if (!val || Number(val) <= 0) { alert("Please enter a valid coin amount"); return; }
+    if (!val || Number(val) <= 0) { alert("Please enter a valid number of coins"); return; }
     coin = Number(val);
     price = "$" + (coin * 0.010333).toFixed(2);
   } else {
@@ -279,10 +281,10 @@ function startTransfer() {
   const total = 3;
   let t = total;
   document.getElementById('loadingPop').style.display = "flex";
-  document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
+  document.getElementById('countDownText').innerText = `Processing in ${t} seconds...`;
   const timer = setInterval(() => {
     t--;
-    document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
+    document.getElementById('countDownText').innerText = `Processing in ${t} seconds...`;
     if (t <= 0) {
       clearInterval(timer);
       document.getElementById('loadingPop').style.display = "none";
@@ -301,8 +303,8 @@ Status: Completed`;
   }, 1000);
 }
 function closeAllPop() {
+  document.getElementById('loadingPop').style.display = "none";
   document.getElementById('successPop').style.display = "none";
-  document.getElementById('customCoins').value = "";
 }
 </script>
 </body>
