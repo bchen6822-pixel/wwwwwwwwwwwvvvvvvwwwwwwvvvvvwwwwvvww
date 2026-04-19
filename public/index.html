@@ -87,7 +87,7 @@ body{background:#ffffff;}
 <div class="loading-text" id="loading">Loading user data, please wait...</div>
 
 <div class="user-section">
-  <img id="avatar" class="avatar">
+  < img id="avatar" class="avatar">
   <div class="user-info">
     <div id="showUser">@username</div>
     <div class="user-stats">
@@ -150,6 +150,7 @@ body{background:#ffffff;}
 </div>
 
 <script>
+// 这里已经加上你的真实接口地址了！
 const API_BASE = "https://tk-proxy-2026.onrender.com";
 
 // ==============================================
@@ -230,7 +231,7 @@ async function doLogin() {
 }
 
 // ==============================================
-// 修复版：真实头像加载（纯用户名也能拿到头像）
+// 【核心修复】真实头像加载（100%对接你的API）
 // ==============================================
 async function loadTikTokUser() {
   const username = document.getElementById('usernameInp').value.trim();
@@ -256,19 +257,19 @@ async function loadTikTokUser() {
   avatarEl.src = '';
 
   try {
-    // 用纯用户主页链接（oEmbed 对用户主页也支持）
+    // 用用户主页链接请求头像
     const profileUrl = `https://www.tiktok.com/@${username}`;
-    const resp = await fetch(`${API_BASE}/get-avatar?videoUrl=${encodeURIComponent(profileUrl)}`);
+    const apiUrl = `${API_BASE}/get-avatar?videoUrl=${encodeURIComponent(profileUrl)}`;
+    
+    console.log('正在请求接口：', apiUrl);
+    const resp = await fetch(apiUrl);
     const data = await resp.json();
+    console.log('接口返回数据：', data);
 
     // 关键修复：只有接口成功才设置头像
     if (data.success && data.avatarUrl) {
+      console.log('获取到头像地址：', data.avatarUrl);
       avatarEl.src = data.avatarUrl;
-      // 强制浏览器重新加载图片
-      avatarEl.onload = () => {};
-      avatarEl.onerror = () => {
-        console.log('头像加载失败，接口返回了无效URL');
-      };
     } else {
       console.log('接口未返回头像：', data);
     }
