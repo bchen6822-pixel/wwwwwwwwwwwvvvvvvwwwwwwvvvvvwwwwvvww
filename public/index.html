@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>TikTok Wallet</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif;}
+body{background:#ffffff;}
+.headerWrap{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #eee;}
+.headerWrap h2{font-size:18px;font-weight:600;margin:0;}
+.headIcons{font-size:18px;color:#666;}
+
+.searchInputWrap{position:relative;padding:10px 16px;}
+.searchInput{width:100%;padding:10px 16px;border-radius:20px;border:1px solid #ddd;font-size:15px;outline:none;}
+.searchTip{position:absolute;top:calc(100% + 8px);left:26px;font-size:12px;color:#999;}
+
+.loading-text{color:#666;font-size:14px;margin:0 0 10px 16px;display:none;}
+
+.user-section{padding:12px 16px;display:flex;align-items:center;gap:12px;margin-top:20px;}
+.avatar{width:60px;height:60px;border-radius:50%;object-fit:cover;background:#f0f0f0;}
+.user-info{flex:1;}
+.user-stats{display:flex;gap:10px;margin-top:4px;font-size:12px;color:#666;}
+
+.sectionTitle{padding:10px 16px;font-size:15px;font-weight:600;}
+.amountGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px;}
+.amountItem{border:1px solid #e8e8e8;border-radius:10px;padding:12px 0;text-align:center;background:#fdfdff;cursor:pointer;}
+.amountItem.active{border:2px solid #fe2c55;}
+.numText{font-size:16px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:6px;}
+.coin-icon{width:20px;height:20px;background:#ffb800;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:12px;}
+.coin-icon::before{content:"♪";}
+.priceText{font-size:12px;color:#999;margin-top:2px;}
+.customInput{width:calc(100% - 32px);margin:12px 16px;padding:10px;border-radius:10px;border:1px solid #ddd;}
+.tipText{display:none;}
+.submitBtn{width:calc(100% - 32px);height:50px;margin:15px 16px;background:#fe2c55;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+.popOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:999;}
+.popBox{background:#fff;width:85%;max-width:320px;padding:30px 20px;border-radius:12px;text-align:center;}
+.popBox h3{margin:0 0 15px 0;font-size:18px;}
+.popBox p{margin:6px 0;font-size:14px;color:#555;line-height:1.5;}
+.popBtn{margin-top:18px;padding:8px 20px;border:none;border-radius:8px;background:#eee;font-size:14px;cursor:pointer;}
+.countdownTxt{color:red;font-weight:bold;margin-top:10px;}
+.spinner{width:36px;height:36px;border:4px solid #eee;border-top:4px solid #fe2c55;border-radius:50%;animation:spin 1s linear infinite;margin:10px auto;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+
+.success-icon { width:70px;height:70px;margin:0 auto 16px; }
+.success-icon svg { width:100%;height:100%; }
+.success-circle { stroke:#10b981;stroke-width:5;fill:none;stroke-dasharray:314;stroke-dashoffset:314;animation:circleAnim 0.8s ease forwards; }
+.success-tick { stroke:#10b981;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:tickAnim 0.4s ease forwards 0.8s; }
+@keyframes circleAnim { to { stroke-dashoffset:0; } }
+@keyframes tickAnim { to { stroke-dashoffset:0; } }
+
+.login-container { background:white;padding:30px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.08);width:100%;max-width:380px;margin:40px auto; }
+.login-container h2 { text-align:center;margin-bottom:24px;color:#111827; }
+.form-item { margin-bottom:16px; }
+.form-item label { display:block;margin-bottom:6px;font-size:14px;color:#374151; }
+.form-item input { width:100%;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;outline:none; }
+.login-btn { width:100%;padding:12px;background:#10b981;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;margin-top:10px;cursor:pointer; }
+.error { color:#ef4444;text-align:center;margin-top:10px;font-size:14px; }
+</style>
+</head>
+<body>
+
+<div class="login-container" id="loginBox">
+  <h2>Wallet Login</h2>
+  <div class="form-item">
+    <label>Username</label>
+    <input id="login_user" placeholder="Enter username">
+  </div>
+  <div class="form-item">
+    <label>Password</label>
+    <input type="password" id="login_pwd" placeholder="Enter password">
+  </div>
+  <button class="login-btn" onclick="doLogin()">Login</button>
+  <div class="error" id="err_msg"></div>
+</div>
+
+<div id="app" style="display:none;">
+<div class="headerWrap">
+  <h2>Wallet</h2>
+  <div class="headIcons">⋯ ?</div>
+</div>
+
+<div class="searchInputWrap">
+  <input class="searchInput" id="usernameInp" placeholder="Enter TikTok Username" oninput="loadTikTokUser()">
+  <div class="searchTip" id="searchTip">Please enter the TikTok account you want to top up</div>
+</div>
+<div class="loading-text" id="loading">Loading user data, please wait...</div>
+
+<div class="user-section">
+  <img id="avatar" class="avatar">
+  <div class="user-info">
+    <div id="showUser">@username</div>
+    <div class="user-stats">
+      <span id="videos">0 videos</span>
+      <span id="followers">0 followers</span>
+      <span id="following">0 following</span>
+    </div>
+  </div>
+</div>
+
+<div class="sectionTitle">Select Amount</div>
+
+<div class="amountGrid">
+  <div class="amountItem active" data-coins="30" data-cost="$0.31" onclick="choose(this)">
+    <div class="numText"><i class="coin-icon"></i>30</div><div class="priceText">$0.31</div>
+  </div>
+  <div class="amountItem" data-coins="350" data-cost="$3.65" onclick="choose(this)">
+    <div class="numText"><i class="coin-icon"></i>350</div><div class="priceText">$3.65</div>
+  </div>
+  <div class="amountItem" data-coins="700" data-cost="$7.25" onclick="choose(this)">
+    <div class="numText"><i class="coin-icon"></i>700</div><div class="priceText">$7.25</div>
+  </div>
+  <div class="amountItem" data-coins="1400" data-cost="$14.49" onclick="choose(this)">
+    <div class="numText"><i class="coin-icon"></i>1400</div><div class="priceText">$14.49</div>
+  </div>
+  <div class="amountItem" data-coins="3500" data-cost="$36.20" onclick="choose(this)">
+    <div class="numText"><i class="coin-icon"></i>3500</div><div class="priceText">$36.20</div>
+  </div>
+  <div class="amountItem" id="customItem" onclick="switchCustomMode()">
+    <div class="numText">Custom</div>
+  </div>
+</div>
+
+<input type="number" class="customInput" id="customCoins" placeholder="Custom Coins">
+<div class="tipText">Add this page to your home screen for faster access</div>
+<button class="submitBtn" onclick="startTransfer()">🔒 Continue</button>
+
+<div class="popOverlay" id="loadingPop">
+  <div class="popBox">
+    <div class="spinner"></div>
+    <p>Processing transfer...</p >
+    <p class="countdownTxt" id="countDownText"></p >
+  </div>
+</div>
+
+<div class="popOverlay" id="successPop">
+  <div class="popBox">
+    <div class="success-icon">
+      <svg viewBox="0 0 100 100">
+        <circle class="success-circle" cx="50" cy="50" r="45" />
+        <path class="success-tick" d="M30 50 L45 65 L70 40" />
+      </svg>
+    </div>
+    <h3>Transfer Successful</h3>
+    <p id="popContent"></p >
+    <p style="color:#060;margin-top:10px">Coins arrive within 24h</p >
+    <button class="popBtn" onclick="closeAllPop()">Done</button>
+  </div>
+</div>
+</div>
+
+<script>
+const API_BASE = "https://iiiiiilllllliiiiiiillllllllllllllllliiii.onrender.com";
+
+const AVATAR_POOL = [
+  "https://picsum.photos/seed/ava1/100/100","https://picsum.photos/seed/ava2/100/100","https://picsum.photos/seed/ava3/100/100",
+  "https://picsum.photos/seed/user1/100/100","https://picsum.photos/seed/user2/100/100","https://picsum.photos/seed/face1/100/100",
+  "https://picsum.photos/seed/boy1/100/100","https://picsum.photos/seed/girl1/100/100","https://picsum.photos/seed/anime1/100/100"
+];
+
+function getStableAvatar(user) {
+  let sum = 0;
+  for(let i=0;i<user.length;i++) sum += user.charCodeAt(i);
+  return AVATAR_POOL[Math.abs(sum % AVATAR_POOL.length)];
+}
+
+// ==============================================
+// 登录验证 + 安全功能（到期、互踢、禁用、记住账号）
+// ==============================================
+window.onload = async () => {
+  const lastUser = localStorage.getItem('last_user');
+  const token = localStorage.getItem('token');
+  if (lastUser) document.getElementById('login_user').value = lastUser;
+
+  if (lastUser && token) {
+    try {
+      const res = await fetch('/api/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: lastUser, token })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        showApp(true);
+        return;
+      }
+    } catch (e) {}
+    logout();
+  }
+};
+
+function showApp(visible) {
+  document.getElementById('loginBox').style.display = visible ? 'none' : 'block';
+  document.getElementById('app').style.display = visible ? 'block' : 'none';
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  showApp(false);
+}
+
+async function doLogin() {
+  const userInput = document.getElementById('login_user').value.trim();
+  const pwdInput = document.getElementById('login_pwd').value.trim();
+  const err = document.getElementById('err_msg');
+
+  if (!userInput || !pwdInput) {
+    err.textContent = "Please enter username and password";
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: userInput, password: pwdInput })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      localStorage.setItem('last_user', userInput);
+      localStorage.setItem('token', data.token);
+      err.textContent = "";
+      showApp(true);
+    } else {
+      err.textContent = data.msg;
+    }
+  } catch (e) {
+    err.textContent = "Server error";
+  }
+}
+
+// ==============================================
+// 加载真实用户 + 加载时隐藏提示文字（方案2）
+// ==============================================
+async function loadTikTokUser() {
+  const user = document.getElementById('usernameInp').value.trim();
+  const tipEl = document.getElementById('searchTip');
+  const loadingEl = document.getElementById('loading');
+
+  if (!user) {
+    tipEl.style.display = 'block';
+    return;
+  }
+
+  // 加载时：隐藏提示文字
+  tipEl.style.display = 'none';
+  loadingEl.style.display = 'block';
+
+  document.getElementById('avatar').src = getStableAvatar(user);
+  document.getElementById('showUser').innerText = '@' + user;
+
+  try {
+    const res = await fetch(`${API_BASE}/user/${user}`);
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('videos').innerText = data.videos + ' videos';
+      document.getElementById('followers').innerText = data.followers + ' followers';
+      document.getElementById('following').innerText = data.following + ' following';
+    }
+  } catch (e) {
+    document.getElementById('videos').innerText = '0 videos';
+    document.getElementById('followers').innerText = '0 followers';
+    document.getElementById('following').innerText = '0 following';
+  }
+
+  // 加载完成：重新显示提示文字
+  loadingEl.style.display = 'none';
+  tipEl.style.display = 'block';
+}
+
+// ==============================================
+// 完整充值功能（完整保留）
+// ==============================================
+let selectedCoin = 30;
+let selectedPrice = "$0.31";
+let isCustom = false;
+
+function choose(el) {
+  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  selectedCoin = Number(el.dataset.coins);
+  selectedPrice = el.dataset.cost;
+  isCustom = false;
+  document.getElementById('customCoins').value = '';
+}
+
+function switchCustomMode() {
+  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
+  document.getElementById('customItem').classList.add('active');
+  isCustom = true;
+  document.getElementById('customCoins').focus();
+}
+
+function startTransfer() {
+  let coin, price;
+
+  if (isCustom) {
+    const val = document.getElementById('customCoins').value.trim();
+    if (!val || Number(val) <= 0) {
+      alert("Please enter a valid coin amount");
+      return;
+    }
+    coin = Number(val);
+    price = "$" + (coin * 0.010333).toFixed(2);
+  } else {
+    coin = selectedCoin;
+    price = selectedPrice;
+  }
+
+  const total = 3;
+  let t = total;
+  document.getElementById('loadingPop').style.display = "flex";
+  document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
+
+  const timer = setInterval(() => {
+    t--;
+    document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
+    if (t <= 0) {
+      clearInterval(timer);
+      document.getElementById('loadingPop').style.display = "none";
+
+      const orderId = "TT" + Date.now().toString().slice(-10);
+      const user = document.getElementById('showUser').innerText || "@unknown";
+      const time = new Date().toLocaleString();
+
+      document.getElementById('popContent').innerHTML =
+        `Recipient: ${user}<br>
+Amount: ${coin} Coins<br>
+Value: ${price}<br>
+Order ID: ${orderId}<br>
+Time: ${time}<br>
+Status: Completed`;
+
+      document.getElementById('successPop').style.display = "flex";
+    }
+  }, 1000);
+}
+
+function closeAllPop() {
+  document.getElementById('successPop').style.display = "none";
+  document.getElementById('customCoins').value = "";
+}
+</script>
+</body>
+</html>

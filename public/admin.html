@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#f7f8fa;}
+.box{background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+h2{margin-top:0;font-size:18px;}
+input,textarea,button{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #ddd;margin-bottom:10px;box-sizing:border-box;}
+button{background:#10b981;color:white;border:none;font-weight:bold;cursor:pointer;}
+.gray{background:#6b7280;}
+.red{background:#ef4444;}
+.table{width:100%;border-collapse:collapse;margin-top:10px;}
+.table th,.table td{padding:8px;text-align:left;font-size:14px;border-bottom:1px solid #eee;}
+.table th{background:#f9fafb;}
+.search{margin-bottom:10px;}
+.form-row{display:flex;gap:8px;}
+.form-row input{flex:1;margin:0;}
+.online{color:#00C853;font-weight:bold;}
+.offline{color:#999;}
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h2>管理员登录</h2>
+  <input id="admin_user" placeholder="账号 admin"><br>
+  <input id="admin_pwd" type="password" placeholder="密码 admin123"><br>
+  <button onclick="adminLogin()">登录</button>
+</div>
+
+<div id="adminPanel" style="display:none;">
+  <div class="box">
+    <h2>单个用户添加</h2>
+    <div class="form-row">
+      <input id="singleUser" placeholder="用户名">
+      <input id="singlePwd" placeholder="密码">
+    </div>
+    <input id="singleExpireDays" type="number" placeholder="有效天数（0=永久）" value="0">
+    <button onclick="addSingleUser()">添加用户</button>
+  </div>
+
+  <div class="box">
+    <h2>批量添加账号</h2>
+    <textarea rows="6" id="batchLines" placeholder="一行一个：账号 密码"></textarea>
+    <input id="expireDays" type="number" placeholder="有效天数（0=永久）" value="0">
+    <button onclick="batchAdd()">批量导入</button>
+  </div>
+
+  <div class="box">
+    <h2>账号列表（自动5秒刷新在线状态）</h2>
+    <input class="search" id="search" placeholder="搜索用户名" oninput="renderList()">
+    <div id="listWrap"></div>
+  </div>
+</div>
+
+<script>
+let all = [];
+let autoRefreshTimer;
+
+async function adminLogin() {
+  const user = document.getElementById('admin_user').value;
+  const pwd = document.getElementById('admin_pwd').value;
+  const r = await fetch('/api/admin/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user, pwd })
+  });
+  const d = await r.json();
+  if (d.ok) {
+    document.getElementById('adminPanel').style.display = 'block';
+    startAutoRefresh();
+  } else {
+    alert('登录失败');
+  }
+}
+
+async function loadList() {
+  try {
+    const r = await fetch('/api/admin/list');
+    all = await r.json();
+    renderList();
+  } catch (e) {}
+}
+
+function renderList() {
+  const kw = document.getElementById('search').value.toLowerCase();
+  const f = all.filter(x => x.username.toLowerCase().includes(kw));
+
+  const html = `
+  <table class="table">
+    <tr>
+      <th>账号</th>
+      <th>密码</th>
+      <th>在线状态</th>
+      <th>创建时间</th>
+      <th>到期时间</th>
+      <th>账号状态</th>
+      <th>操作</th>
+    </tr>
+    ${f.map(x => `
+    <tr>
+      <td>${x.username}</td>
+      <td>${x.password}</td>
+      <td class="${x.online ? 'online' : 'offline'}">${x.online ? '在线' : '离线'}</td>
+      <td>${new Date(x.createdAt).toLocaleString()}</td>
+      <td>${x.expireAt ? new Date(x.expireAt).toLocaleString() : '永久'}</td>
+      <td>${x.enabled ? '启用' : '禁用'}</td>
+      <td>
+        <button style="padding:4px 8px;margin:2px;font-size:12px" onclick="toggle('${x.username}',${!x.enabled})">${x.enabled?'禁用':'启用'}</button>
+        <button class="red" style="padding:4px 8px;margin:2px;font-size:12px" onclick="del('${x.username}')">删除</button>
+      </td>
+    </tr>
+    `).join('')}
+  </table>`;
+
+  document.getElementById('listWrap').innerHTML = html;
+}
+
+// 5秒自动刷新
+function startAutoRefresh() {
+  loadList();
+  clearInterval(autoRefreshTimer);
+  autoRefreshTimer = setInterval(() => {
+    loadList();
+  }, 5000);
+}
+
+async function addSingleUser() {
+  const user = document.getElementById('singleUser').value.trim();
+  const pwd = document.getElementById('singlePwd').value.trim();
+  const days = Number(document.getElementById('singleExpireDays').value) || 0;
+  if (!user || !pwd) { alert('请输入用户名和密码'); return; }
+
+  const lines = `${user} ${pwd}`;
+  const r = await fetch('/api/admin/batch', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lines, days })
+  });
+  const d = await r.json();
+  alert(`成功：${d.success} 个，已存在：${d.exist} 个`);
+  document.getElementById('singleUser').value = '';
+  document.getElementById('singlePwd').value = '';
+  loadList();
+}
+
+async function batchAdd() {
+  const lines = document.getElementById('batchLines').value;
+  const days = Number(document.getElementById('expireDays').value) || 0;
+  const r = await fetch('/api/admin/batch', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lines, days })
+  });
+  const d = await r.json();
+  alert(`成功：${d.success} 个，已存在：${d.exist} 个`);
+  loadList();
+}
+
+async function del(user) {
+  if (!confirm('确定删除？')) return;
+  await fetch('/api/admin/delete', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: user })
+  });
+  loadList();
+}
+
+async function toggle(user, enabled) {
+  await fetch('/api/admin/toggle', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: user, enabled })
+  });
+  loadList();
+}
+</script>
+</body>
+</html>
