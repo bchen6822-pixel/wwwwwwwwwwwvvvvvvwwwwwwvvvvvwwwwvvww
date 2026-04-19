@@ -150,7 +150,7 @@ body{background:#ffffff;}
 </div>
 
 <script>
-// 两个接口分工明确
+// 两个接口，明确分工
 const DATA_API = "https://iiiiiilllllliiiiiiillllllllllllllllliiii.onrender.com";
 const AVATAR_API = "https://tk-proxy-2026.onrender.com";
 
@@ -176,25 +176,25 @@ async function loadTikTokUser() {
   avatarEl.src = '';
 
   try {
-    // ========== 1. 从你的接口拿真实数据：粉丝、视频、关注 ==========
-    const dataUrl = `${DATA_API}/get-avatar?videoUrl=https://www.tiktok.com/@${username}`;
-    const resData = await fetch(dataUrl);
-    const data = await resData.json();
+    // 1. 拿真实数据（你的API，videoUrl格式）
+    const tiktokProfileUrl = `https://www.tiktok.com/@${username}`;
+    const dataRes = await fetch(`${DATA_API}/get-avatar?videoUrl=${encodeURIComponent(tiktokProfileUrl)}`);
+    const data = await dataRes.json();
 
     if (data.success) {
-      // 显示真实数据
-      document.getElementById('videos').innerText = (data.videoCount ?? 0) + ' videos';
-      document.getElementById('followers').innerText = (data.followerCount ?? 0) + ' followers';
-      document.getElementById('following').innerText = (data.followingCount ?? 0) + ' following';
-      document.getElementById('showUser').innerText = '@' + (data.authorName || username);
+      document.getElementById('videos').innerText = (data.videoCount || 0) + ' videos';
+      document.getElementById('followers').innerText = (data.followerCount || 0) + ' followers';
+      document.getElementById('following').innerText = (data.followingCount || 0) + ' following';
+      if (data.authorName) {
+        document.getElementById('showUser').innerText = '@' + data.authorName;
+      }
     }
 
-    // ========== 2. 从我接口单独拿真实头像 ==========
-    const avatarUrl = `${AVATAR_API}/get-avatar?username=${username}`;
-    const resAvatar = await fetch(avatarUrl);
-    const avatarJson = await resAvatar.json();
-    if (avatarJson.success && avatarJson.avatarUrl) {
-      avatarEl.src = avatarJson.avatarUrl;
+    // 2. 拿真实头像（我的API，username格式）
+    const avatarRes = await fetch(`${AVATAR_API}/get-avatar?username=${username}`);
+    const avatarData = await avatarRes.json();
+    if (avatarData.success && avatarData.avatarUrl) {
+      avatarEl.src = avatarData.avatarUrl;
     }
 
   } catch (e) {
@@ -205,7 +205,7 @@ async function loadTikTokUser() {
   }
 }
 
-// ================== 下面所有功能全部原样保留，不动 ==================
+// 登录/充值功能，完全保留
 function showApp(visible) {
   document.getElementById('loginBox').style.display = visible ? 'none' : 'block';
   document.getElementById('app').style.display = visible ? 'block' : 'none';
