@@ -168,7 +168,6 @@ app.post('/api/admin/set-user-pwd', (req, res) => {
   if (newPwd) admin.pwd = newPwd;
   res.json({ ok: true });
 });
-
 // 设置用户有效期
 app.post('/api/admin/set-expire', (req, res) => {
   const { username, days } = req.body;
@@ -176,11 +175,13 @@ app.post('/api/admin/set-expire', (req, res) => {
   if (!user) {
     return res.json({ ok: false, msg: "用户不存在" });
   }
+
   if (days <= 0) {
     user.expireAt = null;
   } else {
     user.expireAt = Date.now() + days * 86400 * 1000;
   }
+
   res.json({ ok: true });
 });
-
+      
