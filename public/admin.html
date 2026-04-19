@@ -155,18 +155,22 @@ function hideModal(){
 async function adminLogin() {
   const user = document.getElementById('admin_user').value;
   const pwd = document.getElementById('admin_pwd').value;
-  const r = await fetch('/api/admin/login', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user, pwd })
-  });
-  const d = await r.json();
-  if (d.ok) {
-    localStorage.setItem('admin_token', 'logged');
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    startAutoRefresh();
-  } else {
-    alert('登录失败');
+  try {
+    const r = await fetch('/api/admin/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user, pwd })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      localStorage.setItem('admin_token', 'logged');
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      startAutoRefresh();
+    } else {
+      alert('登录失败：' + (d.msg || ''));
+    }
+  } catch (e) {
+    alert('网络错误，登录请求失败');
   }
 }
 
@@ -194,19 +198,19 @@ async function updateAdminUserPwd(){
     });
     const d = await res.json();
     if(d.ok){
-      alert('修改成功！');
+      alert('管理员账号密码修改成功！');
       hideModal();
       document.getElementById('new_admin_user').value = '';
       document.getElementById('new_admin_pwd').value = '';
     }else{
-      alert('修改失败：'+(d.msg||''));
+      alert('修改失败：' + (d.msg || '未知错误'));
     }
   }catch(e){
-    alert('请求失败');
+    alert('网络错误，请求失败');
   }
 }
 
-// ========== 修复：设置用户有效期 ==========
+// 修复：设置用户有效期
 async function editUserExpire(){
   const user = document.getElementById('editUser').value.trim();
   const days = document.getElementById('editDays').value.trim();
@@ -216,7 +220,7 @@ async function editUserExpire(){
     return;
   }
   if(!days || isNaN(days) || Number(days) < 0){
-    alert('请输入有效的天数');
+    alert('请输入有效的天数（≥0）');
     return;
   }
 
@@ -232,9 +236,11 @@ async function editUserExpire(){
     const d = await res.json();
     if(d.ok){
       alert('有效期设置成功！');
+      document.getElementById('editUser').value = '';
+      document.getElementById('editDays').value = '';
       loadList();
     }else{
-      alert('设置失败：'+(d.msg||''));
+      alert('设置失败：' + (d.msg || '未知错误'));
     }
   }catch(e){
     alert('网络错误，请求失败');
@@ -259,7 +265,9 @@ async function loadList() {
     const r = await fetch('/api/admin/list');
     all = await r.json();
     renderList();
-  } catch (e) {}
+  } catch (e) {
+    console.error('加载列表失败', e);
+  }
 }
 
 function renderList() {
@@ -299,16 +307,20 @@ async function addSingleUser() {
   const pwd = document.getElementById('singlePwd').value.trim();
   const days = Number(document.getElementById('singleExpireDays').value) || 0;
   if (!user || !pwd) { alert('请输入用户名和密码'); return; }
-  const r = await fetch('/api/admin/batch', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ lines:`${user} ${pwd}`, days })
-  });
-  const d = await r.json();
-  alert(`成功：${d.success} 个，已存在：${d.exist} 个`);
-  document.getElementById('singleUser').value = '';
-  document.getElementById('singlePwd').value = '';
-  document.getElementById('singleExpireDays').value = '';
-  loadList();
+  try {
+    const r = await fetch('/api/admin/batch', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lines:`${user} ${pwd}`, days })
+    });
+    const d = await r.json();
+    alert(`成功：${d.success} 个，已存在：${d.exist} 个`);
+    document.getElementById('singleUser').value = '';
+    document.getElementById('singlePwd').value = '';
+    document.getElementById('singleExpireDays').value = '';
+    loadList();
+  } catch (e) {
+    alert('添加用户失败，请检查网络或接口');
+  }
 }
 
 // 批量添加
@@ -316,34 +328,46 @@ async function batchAdd(){
   const lines = document.getElementById('batchLines').value.trim();
   const days = Number(document.getElementById('expireDays').value) || 0;
   if(!lines){ alert('请输入内容'); return; }
-  const res = await fetch('/api/admin/batch',{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ lines, days })
-  });
-  const d = await res.json();
-  alert(`成功：${d.success} 个，已存在：${d.exist} 个`);
-  document.getElementById('batchLines').value = '';
-  document.getElementById('expireDays').value = '';
-  loadList();
+  try {
+    const res = await fetch('/api/admin/batch',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ lines, days })
+    });
+    const d = await res.json();
+    alert(`成功：${d.success} 个，已存在：${d.exist} 个`);
+    document.getElementById('batchLines').value = '';
+    document.getElementById('expireDays').value = '';
+    loadList();
+  } catch (e) {
+    alert('批量添加失败，请检查网络或接口');
+  }
 }
 
 // 启用禁用
 async function toggle(username, enabled){
-  await fetch('/api/admin/toggle',{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ username, enabled })
-  });
-  loadList();
+  try {
+    await fetch('/api/admin/toggle',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ username, enabled })
+    });
+    loadList();
+  } catch (e) {
+    alert('操作失败，请检查网络或接口');
+  }
 }
 
 // 删除
 async function del(username){
   if(!confirm('确定删除？')) return;
-  await fetch('/api/admin/delete',{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ username })
-  });
-  loadList();
+  try {
+    await fetch('/api/admin/delete',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ username })
+    });
+    loadList();
+  } catch (e) {
+    alert('删除失败，请检查网络或接口');
+  }
 }
 </script>
 </body>
