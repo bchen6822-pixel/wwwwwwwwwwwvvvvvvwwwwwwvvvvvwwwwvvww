@@ -33,6 +33,7 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
   margin:2px;
 }
 
+/* 按钮栏：纯功能按钮，和退出按钮完全无关 */
 .top-bar {
   display: flex;
   gap: 8px;
@@ -51,19 +52,21 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
 .btn-green { background: #10b985; }
 .btn-blue  { background: #3b82f6; }
 
-/* 永远固定右上角，电脑手机都适配 */
+/* 退出按钮：固定在页面最右上角，电脑/手机都适配，永不挤压 */
 .logout-btn {
   position: fixed;
-  top: 10px;
-  right: 12px;
+  top: 16px;
+  right: 16px;
   background: transparent;
   border: none;
-  font-size: 22px;
+  font-size: 24px;
   cursor: pointer;
   color: #666;
   z-index: 9999;
+  padding: 4px;
 }
 
+/* 退出确认弹窗 */
 .confirm-modal {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -129,6 +132,7 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
 
 <div id="adminPanel" style="display:none;">
 
+  <!-- 功能按钮栏，纯功能，和退出无关 -->
   <div class="top-bar">
     <button class="small-btn btn-green" onclick="showModalAdd()">单个添加</button>
     <button class="small-btn btn-green" onclick="showModalBatch()">批量添加</button>
@@ -136,8 +140,10 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
     <button class="small-btn btn-blue" onclick="showModalAdmin()">修改管理员</button>
   </div>
 
+  <!-- 独立的退出按钮，固定在右上角 -->
   <button class="logout-btn" onclick="showLogoutConfirm()">×</button>
 
+  <!-- 退出确认弹窗 -->
   <div class="confirm-modal" id="logoutConfirmModal" onclick="hideLogoutConfirm(event)">
     <div class="confirm-box" onclick="event.stopPropagation()">
       <p>确定要退出登录吗？</p>
@@ -148,6 +154,7 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
     </div>
   </div>
 
+  <!-- 功能弹窗 -->
   <div class="modal" id="modalAdmin">
     <div class="modal-box">
       <h3>修改管理员账号密码</h3>
@@ -201,6 +208,7 @@ button{background:#10b985;color:#fff;border:none;font-weight:bold;cursor:pointer
 let all = [];
 let autoRefreshTimer;
 
+// 功能弹窗控制
 function showModalAdmin() { hideAllModal(); document.getElementById('modalAdmin').classList.add('show'); }
 function showModalAdd()   { hideAllModal(); document.getElementById('modalAdd').classList.add('show'); }
 function showModalBatch() { hideAllModal(); document.getElementById('modalBatch').classList.add('show'); }
@@ -209,6 +217,7 @@ function hideAllModal() {
   document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
 }
 
+// 退出弹窗控制（仅点击×按钮触发）
 function showLogoutConfirm() {
   document.getElementById('logoutConfirmModal').classList.add('show');
 }
@@ -363,10 +372,10 @@ function renderList() {
       <td>${u.enabled?'启用':'禁用'}</td>
       <td>
         <button class="copy-btn" onclick="copyUser('${u.username}','${u.password}')">复制</button>
-        <button style="padding:4px;font-size:12px" onclick="toggle('${u.username}',${!u.enabled})">
+        <button style="padding:4px 8px;font-size:12px;border-radius:4px;background:#3b82f6;color:white;border:none;cursor:pointer;" onclick="toggle('${u.username}',${!u.enabled})">
           ${u.enabled?'禁用':'启用'}
         </button>
-        <button class="red" style="padding:4px;font-size:12px" onclick="del('${u.username}')">删除</button>
+        <button class="red" style="padding:4px 8px;font-size:12px;border-radius:4px;color:white;border:none;cursor:pointer;margin-left:4px;" onclick="del('${u.username}')">删除</button>
       </td>
     </tr>`;
   }
