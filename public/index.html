@@ -116,7 +116,7 @@ body{background:#ffffff;}
 
 .lock-mask{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;padding:20px;text-align:center;}
 
-/* ========== 苹果官方原版人脸动画（你最后发的版本） ========== */
+/* ========== 人脸弹窗样式不变 ========== */
 .faceid-modal{
   position:fixed;inset:0;
   background:rgba(0,0,0,0.7);
@@ -335,23 +335,34 @@ body{background:#ffffff;}
   </div>
 </div>
 
-<!-- 👇 👇 👇 你最后发的 官方原版人脸 + 扫描动画 1:1 还原 👇 👇 👇 -->
+<!-- 改好的：五颜六色旋转动画 → 再变绿色 -->
 <div class="faceid-modal" id="faceidModal">
   <div class="faceid-box">
     <div class="faceid-icon">
       <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none">
         <defs>
-          <linearGradient id="scanBlue" x1="0" y1="0" x2="100%" y2="0">
-            <stop offset="0%" stop-color="#007AFF" stop-opacity="0.15"/>
-            <stop offset="50%" stop-color="#007AFF" stop-opacity="1"/>
-            <stop offset="100%" stop-color="#007AFF" stop-opacity="0.15"/>
-            <animate attributeName="x1" from="-0.5" to="1.5" dur="2.2s" repeatCount="indefinite"/>
-            <animate attributeName="x2" from="0" to="2" dur="2.2s" repeatCount="indefinite"/>
+          <linearGradient id="rainbowGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ff3333"/>
+            <stop offset="20%" stop-color="#ffcc00"/>
+            <stop offset="40%" stop-color="#33ff33"/>
+            <stop offset="60%" stop-color="#0099ff"/>
+            <stop offset="80%" stop-color="#9933ff"/>
+            <stop offset="100%" stop-color="#ff3399"/>
           </linearGradient>
         </defs>
         <style>
           .gray { stroke:#8E8E93; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
-          .blue { stroke:url(#scanBlue); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+          .rainbow-line{
+            stroke:url(#rainbowGrad);
+            stroke-width:1.6;
+            stroke-linecap:round;
+            stroke-linejoin:round;
+            animation: rotAll 1.5s linear infinite;
+          }
+          @keyframes rotAll{
+            0%{transform:rotate(0deg);}
+            100%{transform:rotate(360deg);}
+          }
           .green { stroke:#34C759; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
           .ok-mark { stroke:#34C759; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; opacity:0; }
         </style>
@@ -366,13 +377,9 @@ body{background:#ffffff;}
           <path d="M17 21H19C20.1046 21 21 20.1046 21 19V17"/>
         </g>
 
-        <g class="blue">
-          <path d="M7 3H5C3.89543 3 3 3.89543 3 5V7">
-            <animate attributeName="opacity" values="0;1;0" keyTimes="0;0.5;1" dur="2.2s" repeatCount="indefinite"/>
-          </path>
-          <path d="M17 3H19C20.1046 3 21 3.89543 21 5V7">
-            <animate attributeName="opacity" values="0;1;0" keyTimes="0;0.5;1" dur="2.2s" repeatCount="indefinite"/>
-          </path>
+        <g class="rainbow-line" id="rainbowAnim">
+          <path d="M7 3H5C3.89543 3 3 3.89543 3 5V7"/>
+          <path d="M17 3H19C20.1046 3 21 3.89543 21 5V7"/>
           <path d="M16 8V10"/>
           <path d="M8 8V10"/>
           <path d="M9 16C9 16 10 17 12 17C14 17 15 16 15 16"/>
@@ -642,7 +649,7 @@ function selectPaymentOption(el) {
   el.querySelector('input').checked = true;
 }
 
-// Face ID 官方动画逻辑
+// Face ID 动画逻辑
 function confirmPayment() {
   const selected = document.querySelector('.payment-option.selected')?.dataset?.method;
 
@@ -652,14 +659,18 @@ function confirmPayment() {
     const status = document.getElementById('faceidStatus');
     const green = document.getElementById('faceGreen');
     const ok = document.getElementById('faceOk');
+    const rainbow = document.getElementById('rainbowAnim');
     
     face.style.display = 'flex';
     status.textContent = 'Verifying...';
     status.classList.remove('faceid-success-text');
     green.style.opacity = "0";
     ok.style.opacity = "0";
+    rainbow.style.opacity = "1";
 
     setTimeout(()=>{
+      // 关掉彩虹旋转，变绿色
+      rainbow.style.opacity = "0";
       status.textContent = 'Verified';
       status.classList.add('faceid-success-text');
       green.style.opacity = "1";
