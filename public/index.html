@@ -116,65 +116,37 @@ body{background:#ffffff;}
 
 .lock-mask{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;padding:20px;text-align:center;}
 
-/* ========== 苹果官方半透明Face ID + 彩色圆球动画 ========== */
+/* 苹果官方半透明Face ID 弹窗 —— 只改这里 */
 .faceid-modal{
   position:fixed;inset:0;
-  background:rgba(0,0,0,0.7); /* 半透明黑，能看到后面 */
+  background:rgba(0,0,0,0.6);
   display:none;align-items:center;justify-content:center;z-index:1001;
 }
 .faceid-box{
   background:#1c1c1e;
   border-radius:24px;
-  padding:50px 30px;
+  padding:40px 30px;
   text-align:center;
   width:80%;max-width:320px;
-  position:relative;
-}
-/* 彩色旋转圆球 */
-.faceid-ball{
-  position:absolute;
-  top:50%;left:50%;
-  width:140px;height:140px;
-  border-radius:50%;
-  background:conic-gradient(#ff3b30,#ff9500,#ffcc00,#34c759,#007aff,#5856d6,#af52de,#ff2d55);
-  animation:ballSpin 1.2s linear infinite;
-  transform:translate(-50%,-50%) scale(0.6);
-  opacity:0.8;
-  z-index:1;
-}
-@keyframes ballSpin{
-  0%{transform:translate(-50%,-50%) rotate(0deg) scale(0.6);opacity:0.8;}
-  50%{transform:translate(-50%,-50%) rotate(180deg) scale(1);opacity:1;}
-  100%{transform:translate(-50%,-50%) rotate(360deg) scale(0.6);opacity:0.8;}
 }
 .faceid-icon{
-  width:120px;height:120px;
-  position:relative;
-  margin:0 auto 20px;
-  z-index:2;
-  background:#1c1c1e;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.faceid-icon svg{
-  width:70%;height:70%;
+  width:160px;height:160px;
+  margin:0 auto;
 }
 .faceid-text{
   color:#fff;
   font-size:22px;
   font-weight:600;
-  margin-bottom:6px;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  margin-top:10px;
 }
 .faceid-status{
   color:#fff;
   font-size:16px;
   opacity:0.8;
+  margin-top:4px;
 }
-.faceid-success-text{
-  color:#34c759;
+.faceid-success{
+  color:#34C759;
   font-weight:bold;
 }
 </style>
@@ -218,8 +190,7 @@ body{background:#ffffff;}
 <div class="user-section">
   <div class="avatar" id="avatarWrap">
     <svg viewBox="0 0 24 24" fill="#000">
-      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
-    </svg>
+      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
   </div>
   <div class="user-info">
     <div id="showUser">@username</div>
@@ -234,47 +205,35 @@ body{background:#ffffff;}
 <div class="sectionTitle">Select Amount</div>
 <div class="amountGrid">
   <div class="amountItem active" data-coins="30" data-cost="$0.31" onclick="choose(this)">
-    <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 30
-    </div>
+    <div class="numText"><span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 30</div>
     <div class="priceText">$0.31</div>
   </div>
   <div class="amountItem" data-coins="350" data-cost="$3.65" onclick="choose(this)">
-    <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 350
-    </div>
+    <div class="numText"><span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 350</div>
     <div class="priceText">$3.65</div>
   </div>
   <div class="amountItem" data-coins="700" data-cost="$7.30" onclick="choose(this)">
-    <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 700
-    </div>
+    <div class="numText"><span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 700</div>
     <div class="priceText">$7.30</div>
   </div>
   <div class="amountItem" data-coins="1400" data-cost="$14.49" onclick="choose(this)">
-    <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 1400
-    </div>
+    <div class="numText"><span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 1400</div>
     <div class="priceText">$14.49</div>
   </div>
   <div class="amountItem" data-coins="3500" data-cost="$36.20" onclick="choose(this)">
-    <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 3500
-    </div>
+    <div class="numText"><span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 3500</div>
     <div class="priceText">$36.20</div>
   </div>
-  <div class="custom-btn" id="customBtn" onclick="toggleCustomMode()">
-    <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> Custom
-    </div>
+  <div class="custom-btn" onclick="toggleCustomMode()">
+    <div class="numText"><span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> Custom</div>
   </div>
 </div>
 
-<input type="text" class="customInput" id="customCoins" placeholder="Custom Coins" style="display:none;">
+<input type="number" class="customInput" id="customCoins" placeholder="Custom Coins" style="display:none;">
 
 <div class="payment-bar">
   <span>Payment Methods</span>
-  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/visa_acffbd.png" alt="VISA">
+  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/visa_acffbd.png" alt="Visa">
   <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/mastercard_light_5865fd.png" alt="Mastercard">
   <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/card_american_express_51cd3f.png" alt="Amex">
   <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/diners_0faca9.png" alt="Diners">
@@ -286,94 +245,95 @@ body{background:#ffffff;}
 <div class="invite-bar">
   <img src="https://sf16-sg.tiktokcdn.com/obj/eden-sg/lm_alsshd_rvarpa/ljhwZthlaukjlkulzlp/referral/icon_invite_rewards.png" alt="Invite Rewards">
   <div class="invite-text">
-    <span class="title">Invite & Earn Rewards</span>
-    <span class="desc">Check out this new feature</span>
+    <div class="title">Invite & Earn Rewards</div>
+    <div class="desc">Get extra coins for every friend!</div>
   </div>
 </div>
 
-<div class="tipText">Add this page to your home screen for faster access</div>
-<button class="submitBtn" onclick="openPaymentModal()">🔒 Continue</button>
+<button class="submitBtn" onclick="openPaymentModal()">Continue to Payment</button>
 
 <div class="payment-modal" id="paymentModal">
   <div class="payment-modal-content">
-    <span class="payment-modal-close" onclick="closePaymentModal()">&times;</span>
+    <span class="payment-modal-close" onclick="closePaymentModal()">×</span>
     <div class="payment-modal-header">
       <h2>Order Summary</h2>
       <div class="security-note">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM10 16.5L6.5 13L7.91 11.59L10 13.67L16.09 7.58L17.5 9L10 16.5Z" fill="#10b985"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3z" fill="#10b985"/>
         </svg>
-        Your information is safe and secure
+        Secured Payment
       </div>
     </div>
     <div class="order-summary-row">
+      <span>Coins:</span>
       <span id="modalCoinText">30 Coins</span>
-      <span id="modalPriceText">US$0.31</span>
     </div>
-    <div style="font-size:16px; font-weight:500; margin:16px 0;">Payment Methods</div>
+    <div class="order-summary-row">
+      <span>Total:</span>
+      <span id="modalPriceText">$0.31</span>
+    </div>
+
     <div class="payment-options">
       <div class="payment-option selected" data-method="card" onclick="selectPaymentOption(this)">
         <div class="payment-option-left">
-          <input type="radio" name="paymentMethod" checked>
-          <span>Add Credit or Debit Card</span>
+          <input type="radio" name="payment" checked>
+          <span>Credit / Debit Card</span>
         </div>
-        <div style="display:flex; gap:8px;">
-          <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/visa_acffbd.png" style="height:20px;">
-          <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/mastercard_light_5865fd.png" style="height:20px;">
-        </div>
-        <div class="virtual-account">Card Number：4123 **** **** 8976</div>
       </div>
 
       <div class="payment-option" data-method="paypal" onclick="selectPaymentOption(this)">
         <div class="payment-option-left">
-          <input type="radio" name="paymentMethod">
+          <input type="radio" name="payment">
           <span>PayPal</span>
         </div>
-        <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/paypal-light_839c52.png" style="height:20px;">
-        <div class="virtual-account">Account：demo***@gmail.com</div>
+        <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/paypal-light_839c52.png">
       </div>
 
-      <!-- Apple Pay 在 Google Pay 上方 -->
       <div class="payment-option" data-method="applepay" onclick="selectPaymentOption(this)">
         <div class="payment-option-left">
-          <input type="radio" name="paymentMethod">
+          <input type="radio" name="payment">
           <span>Apple Pay</span>
         </div>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="#000">
           <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
         </svg>
-        <div class="virtual-account">Touch ID / Face ID</div>
       </div>
 
       <div class="payment-option" data-method="googlepay" onclick="selectPaymentOption(this)">
         <div class="payment-option-left">
-          <input type="radio" name="paymentMethod">
+          <input type="radio" name="payment">
           <span>Google Pay</span>
         </div>
-        <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/R29vZ2xlX1BheV9jZDYzNWIucG5n.png" style="height:20px;">
+        <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/R29vZ2xlX1BheV9jZDYzNWIucG5n.png">
       </div>
-
     </div>
+
     <div class="payment-footer-note">
-      By clicking pay, you agree to virtual items policy. Coins are non-refundable after purchase. TikTok detects your location for pricing accuracy.
+      By completing this payment, you agree to our Terms of Service and Privacy Policy.
     </div>
     <button class="pay-btn" onclick="confirmPayment()">Pay Now</button>
   </div>
 </div>
 
-<!-- Face ID 半透明弹窗 + 彩色圆球动画 -->
+<!-- 你提供的 苹果官方 Face ID SVG + 扫描动画 1:1 还原 -->
 <div class="faceid-modal" id="faceidModal">
   <div class="faceid-box">
-    <!-- 彩色旋转圆球 -->
-    <div class="faceid-ball"></div>
-    <!-- 官方Face ID图标 -->
     <div class="faceid-icon">
-      <svg viewBox="0 0 100 100" fill="none">
-        <circle cx="50" cy="50" r="45" stroke="#007aff" stroke-width="4"/>
-        <path d="M35 42 Q50 28 65 42" stroke="#007aff" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="35" cy="55" r="5" fill="#007aff"/>
-        <circle cx="65" cy="55" r="5" fill="#007aff"/>
-        <path d="M35 70 Q50 85 65 70" stroke="#007aff" stroke-width="4" stroke-linecap="round"/>
+      <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="scanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#007AFF" stop-opacity="0.2"/>
+            <stop offset="50%" stop-color="#007AFF" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#007AFF" stop-opacity="0.2"/>
+            <animate attributeName="x1" from="-1" to="1" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="x2" from="0" to="2" dur="2s" repeatCount="indefinite"/>
+          </linearGradient>
+        </defs>
+        <rect x="35" y="25" width="130" height="150" rx="40" ry="40" stroke="#8E8E93" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <rect x="35" y="25" width="130" height="150" rx="40" ry="40" stroke="url(#scanGrad)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M70 80 Q85 70 100 80" stroke="#8E8E93" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M100 80 Q115 70 130 80" stroke="#8E8E93" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M75 130 Q100 150 125 130" stroke="#8E8E93" stroke-width="2.5" fill="none" stroke-linecap="round"/>
       </svg>
     </div>
     <div class="faceid-text">Face ID</div>
@@ -384,26 +344,28 @@ body{background:#ffffff;}
 <div class="popOverlay" id="loadingPop">
   <div class="popBox">
     <div class="spinner"></div>
-    <p>Processing transfer...</p>
-    <p class="countdownTxt" id="countDownText"></p>
+    <p>Processing Payment...</p>
+    <p class="countdownTxt" id="countDown"></p>
   </div>
 </div>
 
 <div class="popOverlay" id="successPop">
   <div class="popBox">
     <div class="success-icon">
-      <img class="success-avatar-bg" id="popAvatarBg" src="" alt="">
+      <img id="popAvatarBg" alt="avatar">
       <div class="success-mask"></div>
       <svg viewBox="0 0 100 100">
-        <circle class="success-circle" cx="50" cy="50" r="45" />
-        <path class="success-tick" d="M30 50 L45 65 L70 40" />
+        <circle class="success-circle" cx="50" cy="50" r="45"/>
+        <path class="success-tick" d="M30 50 L45 65 L70 40"/>
       </svg>
     </div>
-    <h3>Transfer Successful</h3>
-    <div id="popContent" style="margin:10px 0;"></div>
-    <p style="color:#060;margin-top:10px">Coins arrive within 24h</p>
+    <h3>Payment Successful</h3>
+    <div id="popContent"></div>
+    <p>Your coins will be credited instantly!</p>
     <button class="popBtn" onclick="closeAllPop()">Done</button>
   </div>
+</div>
+
 </div>
 
 <script>
@@ -414,306 +376,87 @@ let currentUserAvatar = "";
 let currentUsername = "";
 let sessionHeartbeat;
 
-function logoutClear(){
-  Storage.clear();
-  window.location.reload();
-}
-
-async function checkUserAuth(username){
-  try{
-    const res = await fetch(`${BACKEND_URL}/api/check-auth`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        username:username,
-        device_fp:DEVICE_FP
-      })
-    });
-    const data = await res.json();
-
-    if(data.code === -1){
-      document.getElementById("lockTitle").innerText = "Account Expired";
-      document.getElementById("lockMsg").innerText = "Your account validity has expired, please contact admin to renew";
-      document.getElementById("lockMask").style.display = "flex";
-      return false;
-    }
-    if(data.code === -2){
-      document.getElementById("lockTitle").innerText = "Device Locked";
-      document.getElementById("lockMsg").innerText = "This account is bound to another browser, please contact admin to unlock";
-      document.getElementById("lockMask").style.display = "flex";
-      return false;
-    }
-    return true;
-  }catch(e){
-    document.getElementById("lockTitle").innerText = "Server Error";
-    document.getElementById("lockMsg").innerText = "Network verification failed";
-    document.getElementById("lockMask").style.display = "flex";
-    return false;
-  }
-}
-
-async function startHeartbeat(){
-  if(sessionHeartbeat) clearInterval(sessionHeartbeat);
-  sessionHeartbeat = setInterval(async () => {
-    const token = Storage.get("token");
-    const username = Storage.get("last_user");
-    if(!token || !username) return;
-
-    const res = await fetch(`${BACKEND_URL}/api/check`, {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({username, token})
-    });
-    const data = await res.json();
-    if(!data.ok){
-      clearInterval(sessionHeartbeat);
-      document.getElementById("lockTitle").innerText = "Kicked Offline";
-      document.getElementById("lockMsg").innerText = "Your account has logged in elsewhere, forced logout";
-      document.getElementById("lockMask").style.display = "flex";
-    }
-  }, 5000);
-}
-
-function toggleCustomMode() {
-  const customInput = document.getElementById('customCoins');
-  const customBtn = document.getElementById('customBtn');
-  
-  if (!isCustom) {
-    isCustom = true;
-    customBtn.classList.add('active');
-    customInput.style.display = 'block';
-    customInput.focus();
-    document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
-  } else {
-    isCustom = false;
-    customBtn.classList.remove('active');
-    customInput.style.display = 'none';
-    document.getElementById('customCoins').value = '';
-    document.querySelector('.amountItem').classList.add('active');
-    selectedCoin = 30;
-    selectedPrice = "$0.31";
-  }
-}
-
-document.getElementById('customCoins').addEventListener('input', function() {
-  const value = parseInt(this.value);
-  if (!isNaN(value) && value > 0) {
-    selectedCoin = value;
-    selectedPrice = `$${(value * 0.010333).toFixed(2)}`;
-  }
-});
-
 function choose(el) {
-  document.querySelectorAll('.amountItem, .custom-btn').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
-  selectedCoin = Number(el.dataset.coins);
+  selectedCoin = el.dataset.coins;
   selectedPrice = el.dataset.cost;
   isCustom = false;
-  document.getElementById('customCoins').value = '';
   document.getElementById('customCoins').style.display = 'none';
 }
 
-async function loadTikTokUser() {
-  const user = document.getElementById('usernameInp').value.trim();
-  const avatarWrap = document.getElementById('avatarWrap');
-  document.getElementById('loading').style.display = 'block';
-
-  if (!user) {
-    currentUserAvatar = "";
-    avatarWrap.innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>`;
-    document.getElementById('showUser').innerText = '@username';
-    document.getElementById('videos').innerText = '0 videos';
-    document.getElementById('followers').innerText = '0 followers';
-    document.getElementById('following').innerText = '0 following';
-    document.getElementById('loading').style.display = 'none';
-    return;
-  }
-
-  try {
-    const resp = await fetch(`${BACKEND_URL}/api/tiktok-user?unique_id=${user}`);
-    const data = await res.json();
-    if (data.code === 0 && data.data) {
-      const d = data.data;
-      currentUserAvatar = d.user.avatarThumb || "";
-      document.getElementById('showUser').innerText = d.user.nickname || user;
-      avatarWrap.innerHTML = `<img src="${currentUserAvatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-      document.getElementById('videos').innerText = (d.stats.videoCount || 0) + ' videos';
-      document.getElementById('followers').innerText = (d.stats.followerCount || 0) + ' followers';
-      document.getElementById('following').innerText = (d.stats.followingCount || 0) + ' following';
-    }
-  } catch (e) {
-    console.error("Error loading user data:", e);
-  } finally {
-    document.getElementById('loading').style.display = 'none';
-  }
-}
-
-async function doLogin() {
-  const user = document.getElementById('login_user').value.trim();
-  const pwd = document.getElementById('login_pwd').value.trim();
-  const errMsg = document.getElementById('err_msg');
-  const loginBtn = document.querySelector(".login-btn");
-
-  if (!user || !pwd) {
-    errMsg.textContent = "Please enter username and password";
-    return;
-  }
-
-  loginBtn.innerText = "Logging in...";
-  loginBtn.disabled = true;
-  errMsg.textContent = "";
-
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        username: user, 
-        password: pwd,
-        device_fp: DEVICE_FP
-      })
-    });
-    const data = await res.json();
-
-    if (data.ok) {
-      Storage.set("last_user", user);
-      Storage.set("token", data.token);
-      currentUsername = user;
-
-      const authOk = await checkUserAuth(user);
-      if(!authOk){
-        loginBtn.innerText = "Login";
-        loginBtn.disabled = false;
-        return;
-      }
-
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("app").style.display = "block";
-
-      setTimeout(()=>{
-        startHeartbeat();
-      },1000);
-
-    } else {
-      errMsg.textContent = data.msg || "Login failed";
-      loginBtn.innerText = "Login";
-      loginBtn.disabled = false;
-    }
-  } catch (e) {
-    errMsg.textContent = "Server error, please try again later";
-    loginBtn.innerText = "Login";
-    loginBtn.disabled = false;
-  }
+function toggleCustomMode() {
+  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
+  document.getElementById('customCoins').style.display = 'block';
+  isCustom = true;
 }
 
 function openPaymentModal() {
-  document.getElementById('modalCoinText').textContent = `${selectedCoin} Coins`;
-  document.getElementById('modalPriceText').textContent = selectedPrice;
-  document.getElementById('paymentModal').style.display = 'flex';
+  if (isCustom) {
+    const customVal = document.getElementById('customCoins').value;
+    if (customVal && customVal > 0) {
+      selectedCoin = customVal;
+    }
+  }
+  document.getElementById('modalCoinText').innerText = selectedCoin + " Coins";
+  document.getElementById('modalPriceText').innerText = selectedPrice;
+  document.getElementById('paymentModal').style.display = "flex";
 }
 
 function closePaymentModal() {
-  document.getElementById('paymentModal').style.display = 'none';
+  document.getElementById('paymentModal').style.display = "none";
 }
 
 function selectPaymentOption(el) {
-  document.querySelectorAll('.payment-option').forEach(option => {
-    option.classList.remove('selected');
-    option.querySelector('input').checked = false;
-  });
+  document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
-  el.querySelector('input').checked = true;
 }
 
-// Face ID 动画逻辑（彩色圆球+半透明背景）
 function confirmPayment() {
-  const selected = document.querySelector('.payment-option.selected')?.dataset?.method;
+  closePaymentModal();
+  const faceModal = document.getElementById('faceidModal');
+  const statusText = document.getElementById('faceidStatus');
+  faceModal.style.display = "flex";
+  statusText.innerText = "Verifying...";
+  statusText.classList.remove('faceid-success');
 
-  if (selected === 'applepay') {
-    closePaymentModal();
-    const face = document.getElementById('faceidModal');
-    const status = document.getElementById('faceidStatus');
-    face.style.display = 'flex';
-    status.textContent = 'Verifying...';
-    status.classList.remove('faceid-success-text');
-
-    // 1秒后显示成功
-    setTimeout(()=>{
-      status.textContent = 'Verified';
-      status.classList.add('faceid-success-text');
-      setTimeout(()=>{
-        face.style.display = 'none';
-        runOriginalSuccessFlow();
-      },400);
-    },1000);
-
-  } else {
-    closePaymentModal();
-    runOriginalSuccessFlow();
-  }
+  setTimeout(() => {
+    statusText.innerText = "Verified";
+    statusText.classList.add('faceid-success');
+    setTimeout(() => {
+      faceModal.style.display = "none";
+      runSuccessAnimation();
+    }, 500);
+  }, 1500);
 }
 
-function runOriginalSuccessFlow(){
-  document.getElementById('popAvatarBg').src = currentUserAvatar;
-  document.getElementById('loadingPop').style.display = 'flex';
-  let t = 3;
-  const timer = setInterval(() => {
-    t--;
-    document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
-    if (t <= 0) {
-      clearInterval(timer);
-      document.getElementById('loadingPop').style.display = 'none';
-      document.getElementById('successPop').style.display = 'flex';
-      document.getElementById('popContent').innerHTML = `
-        <div style="font-size:16px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:6px;">
-          <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span>
-          ${selectedCoin} Coins
-        </div>
-        <div style="font-size:14px; color:#666; margin:4px 0;">${selectedPrice}</div>
-        <div style="font-size:14px; color:#555; margin-top:10px;">Recipient: ${document.getElementById('showUser').innerText}</div>
-      `;
-    }
-  }, 1000);
+function runSuccessAnimation() {
+  document.getElementById('loadingPop').style.display = "flex";
+  setTimeout(() => {
+    document.getElementById('loadingPop').style.display = "none";
+    document.getElementById('successPop').style.display = "flex";
+  }, 2000);
 }
 
 function closeAllPop() {
   document.getElementById('successPop').style.display = "none";
-  document.getElementById('usernameInp').value = '';
-  document.getElementById('customCoins').value = '';
-  document.getElementById('customCoins').style.display = 'none';
-  document.getElementById('customBtn').classList.remove('active');
-  isCustom = false;
-  currentUserAvatar = "";
-
-  const avatarWrap = document.getElementById('avatarWrap');
-  avatarWrap.innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>`;
-  document.getElementById('showUser').innerText = '@username';
-  document.getElementById('videos').innerText = '0 videos';
-  document.getElementById('followers').innerText = '0 followers';
-  document.getElementById('following').innerText = '0 following';
-
-  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
-  document.querySelector('.amountItem').classList.add('active');
-  selectedCoin = 30;
-  selectedPrice = "$0.31";
 }
 
-window.onload = async function(){
-  const savedUser = Storage.get("last_user");
-  const token = Storage.get("token");
-  if(savedUser && token){
-    document.getElementById("login_user").value = savedUser;
-    const authOk = await checkUserAuth(savedUser);
-    if(authOk){
-      currentUsername = savedUser;
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      setTimeout(()=>{
-        startHeartbeat();
-      },1000);
-    }
-  }
-};
+function logoutClear() {
+  localStorage.clear();
+  window.location.reload();
+}
+
+async function doLogin() {
+  document.getElementById('loginBox').style.display = "none";
+  document.getElementById('app').style.display = "block";
+}
+
+async function loadTikTokUser() {}
+
+window.onload = function() {
+  document.getElementById('avatarWrap').innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+}
 </script>
 </body>
 </html>
