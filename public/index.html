@@ -115,6 +115,51 @@ body{background:#ffffff;}
 .error { color:#ef4444;text-align:center;margin-top:10px;font-size:14px; }
 
 .lock-mask{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;padding:20px;text-align:center;}
+
+/*  Apple Pay Face ID 动画样式 只新增 不改动你原有代码 */
+.faceid-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,0.85);
+  display:none;align-items:center;justify-content:center;z-index:1001;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from{opacity:0;}
+  to{opacity:1;}
+}
+.faceid-box{
+  background:#1c1c1e;border-radius:24px;padding:50px 30px;
+  text-align:center;width:80%;max-width:280px;
+  animation: popUp 0.3s ease;
+}
+@keyframes popUp {
+  from{transform:scale(0.9);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+.faceid-icon{width:80px;height:80px;margin:0 auto 20px;position:relative;}
+.faceid-icon svg{width:100%;height:100%;}
+.face-scan {
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  border-radius:50%;border:2px solid #fff;
+  animation: scan 1s linear infinite;
+  opacity:0.5;
+}
+@keyframes scan {
+  0%{transform:scale(0.8);opacity:0.8;}
+  50%{transform:scale(1);opacity:0.3;}
+  100%{transform:scale(0.8);opacity:0.8;}
+}
+.faceid-text{color:#fff;font-size:20px;font-weight:600;margin-bottom:6px;}
+.faceid-status{color:#fff;font-size:15px;opacity:0.8;animation: pulse 1.5s infinite;}
+@keyframes pulse {
+  0%{opacity:0.6;}
+  50%{opacity:1;}
+  100%{opacity:0.6;}
+}
+.faceid-success{color:#34c759;font-weight:bold;animation: successAnim 0.4s ease;}
+@keyframes successAnim {
+  from{transform:scale(0.9);opacity:0.5;}
+  to{transform:scale(1);opacity:1;}
+}
 </style>
 </head>
 <body>
@@ -278,11 +323,41 @@ body{background:#ffffff;}
         </div>
         <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/R29vZ2xlX1BheV9jZDYzNWIucG5n.png" style="height:20px;">
       </div>
+
+      <!-- Apple Pay -->
+      <div class="payment-option" data-method="applepay" onclick="selectPaymentOption(this)">
+        <div class="payment-option-left">
+          <input type="radio" name="paymentMethod">
+          <span>Apple Pay</span>
+        </div>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+        <div class="virtual-account">Touch ID / Face ID</div>
+      </div>
     </div>
     <div class="payment-footer-note">
       By clicking pay, you agree to virtual items policy. Coins are non-refundable after purchase. TikTok detects your location for pricing accuracy.
     </div>
     <button class="pay-btn" onclick="confirmPayment()">Pay Now</button>
+  </div>
+</div>
+
+<!-- 人脸动画弹窗 -->
+<div class="faceid-modal" id="faceidModal">
+  <div class="faceid-box">
+    <div class="faceid-icon">
+      <div class="face-scan"></div>
+      <svg viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="5">
+        <circle cx="50" cy="50" r="40" />
+        <path d="M35 40 Q50 25 65 40" stroke-linecap="round"/>
+        <circle cx="35" cy="50" r="4"/>
+        <circle cx="65" cy="50" r="4"/>
+        <path d="M35 65 Q50 80 65 65" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="faceid-text">Face ID</div>
+    <div class="faceid-status" id="faceidStatus">Verifying...</div>
   </div>
 </div>
 
@@ -530,8 +605,33 @@ function selectPaymentOption(el) {
   el.querySelector('input').checked = true;
 }
 
+// 人脸动画流程
 function confirmPayment() {
-  closePaymentModal();
+  const selected = document.querySelector('.payment-option.selected')?.dataset?.method;
+
+  if (selected === 'applepay') {
+    closePaymentModal();
+    const face = document.getElementById('faceidModal');
+    const status = document.getElementById('faceidStatus');
+    face.style.display = 'flex';
+    
+    setTimeout(()=>{
+      status.textContent = 'Verified';
+      status.classList.add('faceid-success');
+      
+      setTimeout(()=>{
+        face.style.display = 'none';
+        runOriginalSuccessFlow();
+      },400);
+    },1000);
+    
+  } else {
+    closePaymentModal();
+    runOriginalSuccessFlow();
+  }
+}
+
+function runOriginalSuccessFlow(){
   document.getElementById('popAvatarBg').src = currentUserAvatar;
   document.getElementById('loadingPop').style.display = 'flex';
   let t = 3;
