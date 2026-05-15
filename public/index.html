@@ -116,40 +116,66 @@ body{background:#ffffff;}
 
 .lock-mask{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;padding:20px;text-align:center;}
 
-/* 苹果官方原生 Face ID 样式（无自定义、纯官方） */
+/* ========== 苹果官方半透明Face ID + 彩色圆球动画 ========== */
 .faceid-modal{
-  position:fixed;inset:0;background:#000000;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.7); /* 半透明黑，能看到后面 */
   display:none;align-items:center;justify-content:center;z-index:1001;
 }
 .faceid-box{
-  width:100%;height:100%;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:#000;
+  background:#1c1c1e;
+  border-radius:24px;
+  padding:50px 30px;
+  text-align:center;
+  width:80%;max-width:320px;
+  position:relative;
+}
+/* 彩色旋转圆球 */
+.faceid-ball{
+  position:absolute;
+  top:50%;left:50%;
+  width:140px;height:140px;
+  border-radius:50%;
+  background:conic-gradient(#ff3b30,#ff9500,#ffcc00,#34c759,#007aff,#5856d6,#af52de,#ff2d55);
+  animation:ballSpin 1.2s linear infinite;
+  transform:translate(-50%,-50%) scale(0.6);
+  opacity:0.8;
+  z-index:1;
+}
+@keyframes ballSpin{
+  0%{transform:translate(-50%,-50%) rotate(0deg) scale(0.6);opacity:0.8;}
+  50%{transform:translate(-50%,-50%) rotate(180deg) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) rotate(360deg) scale(0.6);opacity:0.8;}
 }
 .faceid-icon{
-  width:120px;height:120px;position:relative;
+  width:120px;height:120px;
+  position:relative;
+  margin:0 auto 20px;
+  z-index:2;
+  background:#1c1c1e;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.faceid-scan-ring{
-  position:absolute;left:0;top:0;right:0;bottom:0;
-  border-radius:50%;border:3px solid #007AFF;
-  animation: apple-faceid-scan 1.2s ease-out infinite;
-  opacity:0;
-}
-@keyframes apple-faceid-scan {
-  0%{transform:scale(0.6);opacity:1;}
-  100%{transform:scale(1.1);opacity:0;}
-}
-.faceid-icon-inner{
-  width:100%;height:100%;
-  background:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDgiIHN0cm9rZT0iIzAwN0FGRiIgc3Ryb2tlLXdpZHRoPSI2Ii8+PHBhdGggZD0iTTQwIDUwQzQwIDQ1IDUwIDQwIDYwIDQwQzcwIDQwIDgwIDQ1IDgwIDUwIiBzdHJva2U9IiMwMDdBRkYiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iNDAiIGN5PSI2MCIgcj0iNCIgZmlsbD0iIzAwN0FGRiIvPjxjaXJjbGUgY3g9IjgwIiBjeT0iNjAiIHI9IjQiIGZpbGw9IiMwMDdBRkYiLz48cGF0aCBkPSJNNDAgODBDNDAgODUgNTAgOTAgNjAgOTBDNzAgOTAgODAgODUgODAgODAiIHN0cm9rZT0iIzAwN0FGRiIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=') no-repeat center;
-  background-size:contain;
+.faceid-icon svg{
+  width:70%;height:70%;
 }
 .faceid-text{
-  color:#fff;font-size:22px;font-weight:600;margin-top:30px;
-  font-family:-apple-system, BlinkMacSystemFont, sans-serif;
+  color:#fff;
+  font-size:22px;
+  font-weight:600;
+  margin-bottom:6px;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
 .faceid-status{
-  color:#fff;font-size:16px;opacity:0.8;margin-top:8px;
+  color:#fff;
+  font-size:16px;
+  opacity:0.8;
+}
+.faceid-success-text{
+  color:#34c759;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -307,7 +333,7 @@ body{background:#ffffff;}
         <div class="virtual-account">Account：demo***@gmail.com</div>
       </div>
 
-      <!-- Apple Pay 移到 Google Pay 上方 -->
+      <!-- Apple Pay 在 Google Pay 上方 -->
       <div class="payment-option" data-method="applepay" onclick="selectPaymentOption(this)">
         <div class="payment-option-left">
           <input type="radio" name="paymentMethod">
@@ -335,12 +361,20 @@ body{background:#ffffff;}
   </div>
 </div>
 
-<!-- 苹果官方原版全屏 Face ID 验证界面 -->
+<!-- Face ID 半透明弹窗 + 彩色圆球动画 -->
 <div class="faceid-modal" id="faceidModal">
   <div class="faceid-box">
+    <!-- 彩色旋转圆球 -->
+    <div class="faceid-ball"></div>
+    <!-- 官方Face ID图标 -->
     <div class="faceid-icon">
-      <div class="faceid-scan-ring"></div>
-      <div class="faceid-icon-inner"></div>
+      <svg viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="45" stroke="#007aff" stroke-width="4"/>
+        <path d="M35 42 Q50 28 65 42" stroke="#007aff" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="35" cy="55" r="5" fill="#007aff"/>
+        <circle cx="65" cy="55" r="5" fill="#007aff"/>
+        <path d="M35 70 Q50 85 65 70" stroke="#007aff" stroke-width="4" stroke-linecap="round"/>
+      </svg>
     </div>
     <div class="faceid-text">Face ID</div>
     <div class="faceid-status" id="faceidStatus">Verifying...</div>
@@ -591,7 +625,7 @@ function selectPaymentOption(el) {
   el.querySelector('input').checked = true;
 }
 
-// 苹果官方原版人脸验证逻辑
+// Face ID 动画逻辑（彩色圆球+半透明背景）
 function confirmPayment() {
   const selected = document.querySelector('.payment-option.selected')?.dataset?.method;
 
@@ -600,15 +634,19 @@ function confirmPayment() {
     const face = document.getElementById('faceidModal');
     const status = document.getElementById('faceidStatus');
     face.style.display = 'flex';
-    
+    status.textContent = 'Verifying...';
+    status.classList.remove('faceid-success-text');
+
+    // 1秒后显示成功
     setTimeout(()=>{
       status.textContent = 'Verified';
+      status.classList.add('faceid-success-text');
       setTimeout(()=>{
         face.style.display = 'none';
         runOriginalSuccessFlow();
-      },300);
+      },400);
     },1000);
-    
+
   } else {
     closePaymentModal();
     runOriginalSuccessFlow();
