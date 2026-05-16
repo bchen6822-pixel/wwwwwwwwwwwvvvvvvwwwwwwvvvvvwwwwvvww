@@ -158,6 +158,8 @@ body{background:#ffffff;}
   height:100%;
   object-fit:contain;
   display:block;
+  border-radius:0;
+  background-color:transparent;
 }
 /* 成功绿色SVG默认隐藏 */
 #faceSvgBox{
@@ -352,23 +354,12 @@ body{background:#ffffff;}
 <div class="faceid-modal" id="faceidModal">
   <div class="faceid-box">
     <div class="faceid-icon">
-      <!-- 识别中GIF -->
-      <img id="faceGifImg" src="https://upload.cc/i1/2026/05/16/g1Z5eT.gif" alt="">
+      <!-- 识别中GIF（换了稳定CDN地址） -->
+      <img id="faceGifImg" src="https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif" alt="">
       <!-- 成功绿色原版人脸SVG -->
       <div id="faceSvgBox">
         <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none">
-          <defs>
-            <linearGradient id="scanBlue" x1="0" y1="0" x2="100%" y2="0">
-              <stop offset="0%" stop-color="#007AFF" stop-opacity="0.15"/>
-              <stop offset="50%" stop-color="#007AFF" stop-opacity="1"/>
-              <stop offset="100%" stop-color="#007AFF" stop-opacity="0.15"/>
-              <animate attributeName="x1" from="-0.5" to="1.5" dur="2.2s" repeatCount="indefinite"/>
-              <animate attributeName="x2" from="0" to="2" dur="2.2s" repeatCount="indefinite"/>
-            </linearGradient>
-          </defs>
           <style>
-            .gray { stroke:#8E8E93; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
-            .blue { stroke:url(#scanBlue); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
             .green { stroke:#34C759; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
             .ok-mark { stroke:#34C759; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; opacity:0; }
           </style>
@@ -634,7 +625,7 @@ function selectPaymentOption(el) {
   el.querySelector('input').checked = true;
 }
 
-// 逻辑：先播放你指定GIF → 隐藏GIF → 显示原版绿色成功人脸
+// 逻辑：先播放GIF → 隐藏GIF → 显示原版绿色成功人脸
 function confirmPayment() {
   const selected = document.querySelector('.payment-option.selected')?.dataset?.method;
 
