@@ -174,6 +174,16 @@ body{background:#ffffff;}
   width:100%;
   height:100%;
 }
+/* 登录页底部免责声明样式 */
+.disclaimer-text{
+    font-size:11px;
+    color:#888;
+    text-align:center;
+    line-height:1.6;
+    margin-top:25px;
+    padding-top:15px;
+    border-top:1px solid #eee;
+}
 </style>
 </head>
 <body>
@@ -198,6 +208,11 @@ body{background:#ffffff;}
   </div>
   <button class="login-btn" onclick="doLogin()">Login</button>
   <div class="error" id="err_msg"></div>
+  <!-- 新增免责声明 -->
+  <div class="disclaimer-text">
+本软件仅限教育演示使用，不得用于任何违法行为。
+如有任何不法行为与本软件创作者无关，后果自负。特此注明
+  </div>
 </div>
 
 <div id="app" style="display:none;">
