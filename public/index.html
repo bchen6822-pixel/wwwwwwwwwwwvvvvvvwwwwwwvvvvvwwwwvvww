@@ -108,7 +108,7 @@ body{background:#ffffff;}
 .login-container { background:white;padding:30px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.08);width:100%;max-width:380px;margin:40px auto; }
 .login-container h2 { text-align:center;margin-bottom:24px;color:#111827; }
 .form-item { margin-bottom:16px; }
-.form-item label { display:block;margin-bottom:6px;font-size:14px;color:#374515; }
+.form-item label { display:block;margin-bottom:6px;font-size:14px;color:#374151; }
 .form-item input { width:100%;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;outline:none; }
 .login-btn { width:100%;padding:12px;background:#10b985;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;margin-top:10px;cursor:pointer;transition:all 0.2s; }
 .login-btn:disabled {background:#666;cursor:not-allowed;opacity:0.8;}
@@ -117,16 +117,28 @@ body{background:#ffffff;}
 .lock-mask{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;padding:20px;text-align:center;}
 
 .faceid-modal{
-  position:fixed;inset:0;
-  background:#000; /* 纯黑背景 */
-  display:none;align-items:center;justify-content:center;z-index:1001;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#000;
+  display:none;
+  z-index:1001;
+  width:280px;
+  height:280px;
+  border-radius:24px;
 }
 .faceid-box{
-  background:#000; /* 纯黑背景 */
+  background:#000;
   border-radius:24px;
-  padding:50px 30px;
+  padding:30px 20px;
   text-align:center;
-  width:80%;max-width:320px;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
 }
 .faceid-icon{
   width:120px;height:120px;
@@ -150,8 +162,8 @@ body{background:#ffffff;}
   font-weight:bold;
 }
 #faceVideo{
-  width:100%;
-  height:100%;
+  width:80px;
+  height:80px;
   object-fit:contain;
   display:block;
   border-radius:0;
@@ -629,7 +641,6 @@ function confirmPayment() {
     document.querySelector('.faceid-icon').onclick = function(){
       playFaceGif();
       setTimeout(()=>{
-        // 尾帧停留0.5秒后关闭
         setTimeout(()=>{
           face.style.display = 'none';
           runOriginalSuccessFlow();
