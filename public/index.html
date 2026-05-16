@@ -152,7 +152,7 @@ body{background:#ffffff;}
   color:#34c759;
   font-weight:bold;
 }
-/* GIF图片铺满图标容器 */
+/* GIF默认静止第一帧 */
 #faceGifImg{
   width:100%;
   height:100%;
@@ -160,6 +160,7 @@ body{background:#ffffff;}
   display:block;
   border-radius:0;
   background-color:transparent;
+  animation-play-state: paused;
 }
 /* 成功绿色SVG默认隐藏 */
 #faceSvgBox{
@@ -350,11 +351,11 @@ body{background:#ffffff;}
   </div>
 </div>
 
-<!-- 人脸区域：GIF+原版成功SVG 结构不变位置不变大小不变 -->
+<!-- 人脸区域：使用你的GIF直链 -->
 <div class="faceid-modal" id="faceidModal">
   <div class="faceid-box">
     <div class="faceid-icon">
-      <!-- 识别中GIF（换了稳定CDN地址） -->
+      <!-- 你的GIF -->
       <img id="faceGifImg" src="https://raw.githubusercontent.com/bchen6822-pixel/wwwwwwwwwwwvvvvvvwwwwwwvvvvvwwwwvvww/main/%E4%BA%BA%E8%84%B8%E5%8A%A8%E7%94%BB.gif" alt="">
       <!-- 成功绿色原版人脸SVG -->
       <div id="faceSvgBox">
@@ -377,7 +378,7 @@ body{background:#ffffff;}
       </div>
     </div>
     <div class="faceid-text">Face ID</div>
-    <div class="faceid-status" id="faceidStatus">Verifying...</div>
+    <div class="faceid-status" id="faceidStatus">点击开始验证</div>
   </div>
 </div>
 
@@ -413,6 +414,20 @@ let isCustom = false;
 let currentUserAvatar = "";
 let currentUsername = "";
 let sessionHeartbeat;
+
+// 弹窗打开自动静止GIF
+function resetFaceGif(){
+  let gif = document.getElementById('faceGifImg');
+  gif.style.animationPlayState = 'paused';
+  // 强制回到第一帧
+  gif.src = gif.src;
+}
+
+// 开始播放GIF
+function playFaceGif(){
+  let gif = document.getElementById('faceGifImg');
+  gif.style.animationPlayState = 'running';
+}
 
 function logoutClear(){
   Storage.clear();
@@ -625,7 +640,7 @@ function selectPaymentOption(el) {
   el.querySelector('input').checked = true;
 }
 
-// 逻辑：先播放GIF → 隐藏GIF → 显示原版绿色成功人脸
+// 逻辑：点击后播放GIF → 隐藏GIF → 显示原版绿色成功人脸
 function confirmPayment() {
   const selected = document.querySelector('.payment-option.selected')?.dataset?.method;
 
@@ -637,26 +652,28 @@ function confirmPayment() {
     const svgBox = document.getElementById('faceSvgBox');
     
     face.style.display = 'flex';
-    status.textContent = 'Verifying...';
+    resetFaceGif(); // 打开弹窗静止第一帧
+    status.textContent = '点击开始验证';
     status.classList.remove('faceid-success-text');
-    // 初始显示GIF 隐藏成功SVG
     gifImg.style.display = "block";
     svgBox.style.display = "none";
 
-    // GIF播放时长后切换成功界面
-    setTimeout(()=>{
-      // 隐藏GIF
-      gifImg.style.display = "none";
-      // 显示原版绿色成功人脸+对勾
-      svgBox.style.display = "block";
-      status.textContent = 'Verified';
-      status.classList.add('faceid-success-text');
-      
+    // 点击人脸图标开始播放
+    document.querySelector('.faceid-icon').onclick = function(){
+      playFaceGif();
+      status.textContent = 'Verifying...';
       setTimeout(()=>{
-        face.style.display = 'none';
-        runOriginalSuccessFlow();
-      },400);
-    },1000);
+        gifImg.style.display = "none";
+        svgBox.style.display = "block";
+        status.textContent = 'Verified';
+        status.classList.add('faceid-success-text');
+        
+        setTimeout(()=>{
+          face.style.display = 'none';
+          runOriginalSuccessFlow();
+        },400);
+      },1000);
+    };
 
   } else {
     closePaymentModal();
