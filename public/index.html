@@ -85,7 +85,7 @@ body{background:#ffffff;}
 .success-mask{position:absolute;inset:0;background:rgba(0,0,0,0.35);border-radius:50%;}
 .success-icon svg {position:absolute;inset:0;width:100%;height:100%;}
 .success-circle { stroke:#10b985;stroke-width:5;fill:none;stroke-dasharray:314;stroke-dashoffset:314;animation:circleAnim 0.8s ease forwards; }
-.success-tick { stroke:#10b985;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:tickAnim 0.4s ease forwards 0.8s; }
+.success-tick { stroke:#10b985;stroke-width:5;fill:none;stroke-dasharray:80;stroke-dashoffset:80;animation:tickAnim 0.4s ease forwards 0.8s; }
 @keyframes circleAnim { to { stroke-dashoffset:0; } }
 @keyframes tickAnim { to { stroke-dashoffset:0; } }
 
@@ -105,7 +105,7 @@ body{background:#ffffff;}
 .payment-footer-note {font-size:12px;color:#666;line-height:1.5;margin:16px 0;}
 .pay-btn {width:100%;height:50px;background:#fe2c55;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
 
-.login-container { background:white;padding:30px;border-radius:16px;box-shadow:0 10px 25pxrgba(0,0,0,0.08);width:100%;max-width:380px;margin:40px auto; }
+.login-container { background:white;padding:30px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.08);width:100%;max-width:380px;margin:40px auto; }
 .login-container h2 { text-align:center;margin-bottom:24px;color:#111827; }
 .form-item { margin-bottom:16px; }
 .form-item label { display:block;margin-bottom:6px;font-size:14px;color:#374151; }
@@ -116,7 +116,6 @@ body{background:#ffffff;}
 
 .lock-mask{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;padding:20px;text-align:center;}
 
-/* 人脸弹窗样式完全原样不变 */
 .faceid-modal{
   position:fixed;inset:0;
   background:rgba(0,0,0,0.7);
@@ -144,25 +143,20 @@ body{background:#ffffff;}
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
 .faceid-status{
-  color:#fff;
-  font-size:16px;
-  opacity:0.8;
+  display:none;
 }
 .faceid-success-text{
   color:#34c759;
   font-weight:bold;
 }
-/* GIF默认静止第一帧 */
-#faceGifImg{
+#faceVideo{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
   border-radius:0;
   background-color:transparent;
-  animation-play-state: paused;
 }
-/* 成功绿色SVG默认隐藏 */
 #faceSvgBox{
   display:none;
   width:100%;
@@ -351,13 +345,12 @@ body{background:#ffffff;}
   </div>
 </div>
 
-<!-- 人脸区域：使用你的GIF直链 -->
 <div class="faceid-modal" id="faceidModal">
   <div class="faceid-box">
     <div class="faceid-icon">
-      <!-- 你的GIF -->
-      <img id="faceGifImg" src="https://raw.githubusercontent.com/bchen6822-pixel/wwwwwwwwwwwvvvvvvwwwwwwvvvvvwwwwvvww/main/%E4%BA%BA%E8%84%B8%E5%8A%A8%E7%94%BB.gif" alt="">
-      <!-- 成功绿色原版人脸SVG -->
+      <video id="faceVideo" width="100%" height="100%" object-fit="contain" muted preload="auto">
+        <source src="https://raw.githubusercontent.com/bchen6822-pixel/wwwwwwwwwwwvvvvvvwwwwwwvvvvvwwwwvvww/main/%E4%BA%BA%E8%84%B8%E5%8A%A8%E7%94%BB.mp4" type="video/mp4">
+      </video>
       <div id="faceSvgBox">
         <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none">
           <style>
@@ -378,7 +371,7 @@ body{background:#ffffff;}
       </div>
     </div>
     <div class="faceid-text">Face ID</div>
-    <div class="faceid-status" id="faceidStatus">点击开始验证</div>
+    <div class="faceid-status" id="faceidStatus"></div>
   </div>
 </div>
 
@@ -415,18 +408,14 @@ let currentUserAvatar = "";
 let currentUsername = "";
 let sessionHeartbeat;
 
-// 弹窗打开自动静止GIF
 function resetFaceGif(){
-  let gif = document.getElementById('faceGifImg');
-  gif.style.animationPlayState = 'paused';
-  // 强制回到第一帧
-  gif.src = gif.src;
+  let vid = document.getElementById('faceVideo');
+  vid.pause();
+  vid.currentTime = 0;
 }
-
-// 开始播放GIF
 function playFaceGif(){
-  let gif = document.getElementById('faceGifImg');
-  gif.style.animationPlayState = 'running';
+  let vid = document.getElementById('faceVideo');
+  vid.play();
 }
 
 function logoutClear(){
@@ -640,34 +629,25 @@ function selectPaymentOption(el) {
   el.querySelector('input').checked = true;
 }
 
-// 逻辑：点击后播放GIF → 隐藏GIF → 显示原版绿色成功人脸
 function confirmPayment() {
   const selected = document.querySelector('.payment-option.selected')?.dataset?.method;
 
   if (selected === 'applepay') {
     closePaymentModal();
     const face = document.getElementById('faceidModal');
-    const status = document.getElementById('faceidStatus');
-    const gifImg = document.getElementById('faceGifImg');
+    const video = document.getElementById('faceVideo');
     const svgBox = document.getElementById('faceSvgBox');
     
     face.style.display = 'flex';
-    resetFaceGif(); // 打开弹窗静止第一帧
-    status.textContent = '点击开始验证';
-    status.classList.remove('faceid-success-text');
-    gifImg.style.display = "block";
+    resetFaceGif();
+    video.style.display = "block";
     svgBox.style.display = "none";
 
-    // 点击人脸图标开始播放
     document.querySelector('.faceid-icon').onclick = function(){
       playFaceGif();
-      status.textContent = 'Verifying...';
       setTimeout(()=>{
-        gifImg.style.display = "none";
+        video.style.display = "none";
         svgBox.style.display = "block";
-        status.textContent = 'Verified';
-        status.classList.add('faceid-success-text');
-        
         setTimeout(()=>{
           face.style.display = 'none';
           runOriginalSuccessFlow();
