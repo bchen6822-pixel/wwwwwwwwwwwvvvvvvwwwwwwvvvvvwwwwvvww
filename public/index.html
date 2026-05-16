@@ -116,7 +116,7 @@ body{background:#ffffff;}
 
 .lock-mask{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;padding:20px;text-align:center;}
 
-/* ========== 人脸弹窗样式不变 ========== */
+/* 人脸弹窗样式完全原样不变 */
 .faceid-modal{
   position:fixed;inset:0;
   background:rgba(0,0,0,0.7);
@@ -151,6 +151,19 @@ body{background:#ffffff;}
 .faceid-success-text{
   color:#34c759;
   font-weight:bold;
+}
+/* GIF图片铺满图标容器 */
+#faceGifImg{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+/* 成功绿色SVG默认隐藏 */
+#faceSvgBox{
+  display:none;
+  width:100%;
+  height:100%;
 }
 </style>
 </head>
@@ -335,70 +348,42 @@ body{background:#ffffff;}
   </div>
 </div>
 
-<!-- 改好的：五颜六色旋转动画 → 再变绿色 -->
+<!-- 人脸区域：GIF+原版成功SVG 结构不变位置不变大小不变 -->
 <div class="faceid-modal" id="faceidModal">
   <div class="faceid-box">
     <div class="faceid-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none">
-        <defs>
-          <linearGradient id="rainbowGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#ff3333"/>
-            <stop offset="20%" stop-color="#ffcc00"/>
-            <stop offset="40%" stop-color="#33ff33"/>
-            <stop offset="60%" stop-color="#0099ff"/>
-            <stop offset="80%" stop-color="#9933ff"/>
-            <stop offset="100%" stop-color="#ff3399"/>
-          </linearGradient>
-        </defs>
-        <style>
-          .gray { stroke:#8E8E93; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
-          .rainbow-line{
-            stroke:url(#rainbowGrad);
-            stroke-width:1.6;
-            stroke-linecap:round;
-            stroke-linejoin:round;
-            animation: rotAll 1.5s linear infinite;
-          }
-          @keyframes rotAll{
-            0%{transform:rotate(0deg);}
-            100%{transform:rotate(360deg);}
-          }
-          .green { stroke:#34C759; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
-          .ok-mark { stroke:#34C759; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; opacity:0; }
-        </style>
-
-        <g class="gray">
-          <path d="M7 3H5C3.89543 3 3 3.89543 3 5V7"/>
-          <path d="M17 3H19C20.1046 3 21 3.89543 21 5V7"/>
-          <path d="M16 8V10"/>
-          <path d="M8 8V10"/>
-          <path d="M9 16C9 16 10 17 12 17C14 17 15 16 15 16"/>
-          <path d="M7 21H5C3.89543 21 3 20.1046 3 19V17"/>
-          <path d="M17 21H19C20.1046 21 21 20.1046 21 19V17"/>
-        </g>
-
-        <g class="rainbow-line" id="rainbowAnim">
-          <path d="M7 3H5C3.89543 3 3 3.89543 3 5V7"/>
-          <path d="M17 3H19C20.1046 3 21 3.89543 21 5V7"/>
-          <path d="M16 8V10"/>
-          <path d="M8 8V10"/>
-          <path d="M9 16C9 16 10 17 12 17C14 17 15 16 15 16"/>
-          <path d="M7 21H5C3.89543 21 3 20.1046 3 19V17"/>
-          <path d="M17 21H19C20.1046 21 21 20.1046 21 19V17"/>
-        </g>
-
-        <g class="green" id="faceGreen" opacity="0">
-          <path d="M7 3H5C3.89543 3 3 3.89543 3 5V7"/>
-          <path d="M17 3H19C20.1046 3 21 3.89543 21 5V7"/>
-          <path d="M16 8V10"/>
-          <path d="M8 8V10"/>
-          <path d="M9 16C9 16 10 17 12 17C14 17 15 16 15 16"/>
-          <path d="M7 21H5C3.89543 21 3 20.1046 3 19V17"/>
-          <path d="M17 21H19C20.1046 21 21 20.1046 21 19V17"/>
-        </g>
-
-        <path class="ok-mark" id="faceOk" d="M8 12L10.5 15L16 9"/>
-      </svg>
+      <!-- 识别中GIF -->
+      <img id="faceGifImg" src="https://upload.cc/i1/2026/05/16/g1Z5eT.gif" alt="">
+      <!-- 成功绿色原版人脸SVG -->
+      <div id="faceSvgBox">
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none">
+          <defs>
+            <linearGradient id="scanBlue" x1="0" y1="0" x2="100%" y2="0">
+              <stop offset="0%" stop-color="#007AFF" stop-opacity="0.15"/>
+              <stop offset="50%" stop-color="#007AFF" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#007AFF" stop-opacity="0.15"/>
+              <animate attributeName="x1" from="-0.5" to="1.5" dur="2.2s" repeatCount="indefinite"/>
+              <animate attributeName="x2" from="0" to="2" dur="2.2s" repeatCount="indefinite"/>
+            </linearGradient>
+          </defs>
+          <style>
+            .gray { stroke:#8E8E93; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+            .blue { stroke:url(#scanBlue); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+            .green { stroke:#34C759; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+            .ok-mark { stroke:#34C759; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; opacity:0; }
+          </style>
+          <g class="green" id="faceGreen" opacity="1">
+            <path d="M7 3H5C3.89543 3 3 3.89543 3 5V7"/>
+            <path d="M17 3H19C20.1046 3 21 3.89543 21 5V7"/>
+            <path d="M16 8V10"/>
+            <path d="M8 8V10"/>
+            <path d="M9 16C9 16 10 17 12 17C14 17 15 16 15 16"/>
+            <path d="M7 21H5C3.89543 21 3 20.1046 3 19V17"/>
+            <path d="M17 21H19C20.1046 21 21 20.1046 21 19V17"/>
+          </g>
+          <path class="ok-mark" id="faceOk" style="opacity:1;" d="M8 12L10.5 15L16 9"/>
+        </svg>
+      </div>
     </div>
     <div class="faceid-text">Face ID</div>
     <div class="faceid-status" id="faceidStatus">Verifying...</div>
@@ -649,7 +634,7 @@ function selectPaymentOption(el) {
   el.querySelector('input').checked = true;
 }
 
-// Face ID 动画逻辑
+// 逻辑：先播放你指定GIF → 隐藏GIF → 显示原版绿色成功人脸
 function confirmPayment() {
   const selected = document.querySelector('.payment-option.selected')?.dataset?.method;
 
@@ -657,24 +642,24 @@ function confirmPayment() {
     closePaymentModal();
     const face = document.getElementById('faceidModal');
     const status = document.getElementById('faceidStatus');
-    const green = document.getElementById('faceGreen');
-    const ok = document.getElementById('faceOk');
-    const rainbow = document.getElementById('rainbowAnim');
+    const gifImg = document.getElementById('faceGifImg');
+    const svgBox = document.getElementById('faceSvgBox');
     
     face.style.display = 'flex';
     status.textContent = 'Verifying...';
     status.classList.remove('faceid-success-text');
-    green.style.opacity = "0";
-    ok.style.opacity = "0";
-    rainbow.style.opacity = "1";
+    // 初始显示GIF 隐藏成功SVG
+    gifImg.style.display = "block";
+    svgBox.style.display = "none";
 
+    // GIF播放时长后切换成功界面
     setTimeout(()=>{
-      // 关掉彩虹旋转，变绿色
-      rainbow.style.opacity = "0";
+      // 隐藏GIF
+      gifImg.style.display = "none";
+      // 显示原版绿色成功人脸+对勾
+      svgBox.style.display = "block";
       status.textContent = 'Verified';
       status.classList.add('faceid-success-text');
-      green.style.opacity = "1";
-      ok.style.opacity = "1";
       
       setTimeout(()=>{
         face.style.display = 'none';
