@@ -59,7 +59,13 @@ body{background:#ffffff;}
 .user-stats{display:flex;gap:10px;margin-top:4px;font-size:12px;color:#666;}
 
 .sectionTitle{padding:10px 16px;font-size:16px;font-weight:600;margin-top:12px;}
-.amountGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;}
+/* =========【修复手机适配】grid 自动换行，不再强制4列 ========= */
+.amountGrid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap:10px;
+  padding:0 16px;
+}
 .amountItem{border:1px solid #e8e8e8;border-radius:10px;padding:14px 0;text-align:center;background:#fdfdff;cursor:pointer;}
 .amountItem.active{border:2px solid #fe2c55;}
 .numText{font-size:16px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:6px;}
@@ -275,19 +281,19 @@ This software is for educational demonstration only. Any illegal use is unrelate
     <div class="numText">
       <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 250
     </div>
-    <div class="priceText">$${(250 / USD_TO_COIN_RATE).toFixed(2)}</div>
+    <div class="priceText" data-calc="250"></div>
   </div>
   <div class="amountItem" data-coins="500" onclick="choose(this)">
     <div class="numText">
       <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 500
     </div>
-    <div class="priceText">$${(500 / USD_TO_COIN_RATE).toFixed(2)}</div>
+    <div class="priceText" data-calc="500"></div>
   </div>
   <div class="amountItem" data-coins="15000" onclick="choose(this)">
     <div class="numText">
       <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 15,000
     </div>
-    <div class="priceText">$${(15000 / USD_TO_COIN_RATE).toFixed(2)}</div>
+    <div class="priceText" data-calc="15000"></div>
   </div>
   <div class="amountItem" id="customBtn" data-custom="1" onclick="choose(this)">
     <div class="numText">
@@ -317,7 +323,7 @@ This software is for educational demonstration only. Any illegal use is unrelate
     </div>
     <div class="order-summary-row">
       <span id="modalCoinText">250 Coins</span>
-      <span id="modalPriceText">US$${(250 / USD_TO_COIN_RATE).toFixed(2)}</span>
+      <span id="modalPriceText">US$0.00</span>
     </div>
     <div style="font-size:16px; font-weight:500; margin:16px 0;">Payment Methods</div>
     <div class="payment-options">
@@ -413,6 +419,15 @@ let isCustom = false;
 let currentUserAvatar = "";
 let currentUsername = "";
 let sessionHeartbeat;
+
+// 页面加载自动渲染每一项美金价格
+function renderPriceLabels(){
+  document.querySelectorAll('.priceText[data-calc]').forEach(el=>{
+    const coinNum = Number(el.dataset.calc);
+    const usd = (coinNum / USD_TO_COIN_RATE).toFixed(2);
+    el.textContent = `$${usd}`;
+  })
+}
 
 function resetFaceGif(){
   let vid = document.getElementById('faceVideo');
@@ -774,6 +789,7 @@ function nextResetFlow() {
 }
 
 window.onload = async function(){
+  renderPriceLabels(); // 加载立刻渲染美金价格
   const savedUser = Storage.get("last_user");
   const token = Storage.get("token");
   if(savedUser && token){
