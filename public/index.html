@@ -6,6 +6,7 @@
 <title>TikTok Exchange</title>
 <script>
 const BACKEND_URL = "https://shujucaijihouduan.onrender.com";
+const USD_TO_COIN_RATE = 95; // 和后端统一 1 USD = 95 Coin
 
 function getBrowserFingerprint(){
   const info = navigator.userAgent + screen.width + screen.height + navigator.language;
@@ -283,23 +284,23 @@ This software is for educational demonstration only. Any illegal use is unrelate
 
 <div class="sectionTitle">Exchange earnings for Coins</div>
 <div class="amountGrid">
-  <div class="amountItem active" data-coins="250" data-cost="$3.03" onclick="choose(this)">
+  <div class="amountItem active" data-coins="250" onclick="choose(this)">
     <div class="numText">
       <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 250
     </div>
-    <div class="priceText">$3.03</div>
+    <div class="priceText">$${(250 / USD_TO_COIN_RATE).toFixed(2)}</div>
   </div>
-  <div class="amountItem" data-coins="500" data-cost="$6.07" onclick="choose(this)">
+  <div class="amountItem" data-coins="500" onclick="choose(this)">
     <div class="numText">
       <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 500
     </div>
-    <div class="priceText">$6.07</div>
+    <div class="priceText">$${(500 / USD_TO_COIN_RATE).toFixed(2)}</div>
   </div>
-  <div class="amountItem" data-coins="15000" data-cost="$182.04" onclick="choose(this)">
+  <div class="amountItem" data-coins="15000" onclick="choose(this)">
     <div class="numText">
       <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 15,000
     </div>
-    <div class="priceText">$182.04</div>
+    <div class="priceText">$${(15000 / USD_TO_COIN_RATE).toFixed(2)}</div>
   </div>
   <div class="amountItem" id="customBtn" data-custom="1" onclick="choose(this)">
     <div class="numText">
@@ -327,7 +328,7 @@ This software is for educational demonstration only. Any illegal use is unrelate
     </div>
     <div class="order-summary-row">
       <span id="modalCoinText">250 Coins</span>
-      <span id="modalPriceText">US$3.03</span>
+      <span id="modalPriceText">US$${(250 / USD_TO_COIN_RATE).toFixed(2)}</span>
     </div>
     <div style="font-size:16px; font-weight:500; margin:16px 0;">Payment Methods</div>
     <div class="payment-options">
@@ -419,7 +420,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
 
 <script>
 let selectedCoin = 250;
-let selectedPrice = "$3.03";
 let isCustom = false;
 let currentUserAvatar = "";
 let currentUsername = "";
@@ -438,6 +438,27 @@ function playFaceGif(){
 function logoutClear(){
   Storage.clear();
   window.location.reload();
+}
+
+// 拉取余额刷新页面
+async function refreshBalance(){
+  const token = Storage.get("token");
+  const username = Storage.get("last_user");
+  if(!token || !username) return;
+  try{
+    const res = await fetch(`${BACKEND_URL}/api/check`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({username, token})
+    });
+    const data = await res.json();
+    if(data.ok){
+      document.getElementById("balanceUsd").textContent = `$${Number(data.usd_balance).toFixed(2)}`;
+      document.getElementById("balanceEqual").innerHTML = `$${Number(data.usd_balance).toFixed(2)} <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">${Number(data.coin_balance).toLocaleString()}</span>`;
+    }
+  }catch(e){
+    console.log("刷新余额失败",e)
+  }
 }
 
 async function checkUserAuth(username){
@@ -463,11 +484,6 @@ async function checkUserAuth(username){
       document.getElementById("lockMsg").innerText = "This account is bound to another browser, please contact admin to unlock";
       document.getElementById("lockMask").style.display = "flex";
       return false;
-    }
-    // ✅ 如果后端返回余额，在这里渲染余额
-    if(data.balance_usd !== undefined && data.balance_coins !== undefined){
-      document.getElementById("balanceUsd").textContent = `$${Number(data.balance_usd).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-      document.getElementById("balanceEqual").innerHTML = `$${Number(data.balance_usd).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">${Number(data.balance_coins).toLocaleString()}</span>`;
     }
     return true;
   }catch(e){
@@ -505,17 +521,14 @@ function choose(el) {
   el.classList.add('active');
 
   if(el.dataset.custom == "1"){
-    // 选中自定义
     isCustom = true;
     document.getElementById('customCoins').style.display = 'block';
     document.getElementById('customCoins').focus();
   }else{
-    // 选中预设档位
     isCustom = false;
     document.getElementById('customCoins').style.display = 'none';
     document.getElementById('customCoins').value = '';
     selectedCoin = Number(el.dataset.coins);
-    selectedPrice = el.dataset.cost;
   }
 }
 
@@ -523,7 +536,6 @@ document.getElementById('customCoins').addEventListener('input', function() {
   const value = parseInt(this.value);
   if (!isNaN(value) && value > 0) {
     selectedCoin = value;
-    selectedPrice = `$${(value * 0.010333).toFixed(2)}`;
   }
 });
 
@@ -604,6 +616,9 @@ async function doLogin() {
         loginBtn.disabled = false;
         return;
       }
+      // 登录成功渲染余额
+      document.getElementById("balanceUsd").textContent = `$${Number(data.usd_balance).toFixed(2)}`;
+      document.getElementById("balanceEqual").innerHTML = `$${Number(data.usd_balance).toFixed(2)} <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">${Number(data.coin_balance).toLocaleString()}</span>`;
 
       document.getElementById("loginBox").style.display = "none";
       document.getElementById("app").style.display = "block";
@@ -625,7 +640,6 @@ async function doLogin() {
 }
 
 function openPaymentModal() {
-  // 如果是自定义，先读取输入框数字
   if(isCustom){
     let val = parseInt(document.getElementById("customCoins").value);
     if(!val || val <=0){
@@ -633,10 +647,13 @@ function openPaymentModal() {
       return;
     }
     selectedCoin = val;
-    selectedPrice = `$${(val * 0.010333).toFixed(2)}`;
   }
-  // 直接跳过支付弹窗，不打开 paymentModal，直接进倒计时
-  runOriginalSuccessFlow();
+  // 更新弹窗文字
+  const usdNeed = selectedCoin / USD_TO_COIN_RATE;
+  document.getElementById("modalCoinText").innerText = `${selectedCoin} Coins`;
+  document.getElementById("modalPriceText").innerText = `US$${usdNeed.toFixed(2)}`;
+
+  document.getElementById('paymentModal').style.display = 'flex';
 }
 
 function closePaymentModal() {
@@ -666,43 +683,74 @@ function confirmPayment() {
     video.style.display = "block";
     svgBox.style.display = "none";
 
-    document.querySelector('.faceid-icon').onclick = function(){
+    document.querySelector('.faceid-icon').onclick = async function(){
       playFaceGif();
-      setTimeout(()=>{
-        setTimeout(()=>{
+      setTimeout(async ()=>{
+        setTimeout(async ()=>{
           face.style.display = 'none';
-          runOriginalSuccessFlow();
+          await runDeductAndFlow();
         }, 500);
       },1000);
     };
 
   } else {
     closePaymentModal();
-    runOriginalSuccessFlow();
+    runDeductAndFlow();
   }
 }
 
-function runOriginalSuccessFlow(){
-  document.getElementById('popAvatarBg').src = currentUserAvatar;
-  document.getElementById('loadingPop').style.display = 'flex';
-  let t = 3;
-  const timer = setInterval(() => {
-    t--;
-    document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
-    if (t <= 0) {
-      clearInterval(timer);
-      document.getElementById('loadingPop').style.display = 'none';
-      document.getElementById('successPop').style.display = 'flex';
-      document.getElementById('popContent').innerHTML = `
-        <div style="font-size:16px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:6px;">
-          <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span>
-          ${selectedCoin} Coins
-        </div>
-        <div style="font-size:14px; color:#666; margin:4px 0;">${selectedPrice}</div>
-        <div style="font-size:14px; color:#555; margin-top:10px;">Recipient: ${document.getElementById('showUser').innerText}</div>
-      `;
+// 【核心新增】先调用后端扣款接口，成功才走倒计时成功弹窗
+async function runDeductAndFlow(){
+  const token = Storage.get("token");
+  const username = Storage.get("last_user");
+  if(!token || !username){
+    alert("登录失效，请重新登录");
+    logoutClear();
+    return;
+  }
+
+  try{
+    const deductRes = await fetch(`${BACKEND_URL}/api/deduct-coin`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        username: username,
+        token: token,
+        coinAmount: selectedCoin
+      })
+    });
+    const deductData = await deductRes.json();
+    if(!deductData.ok){
+      alert(deductData.msg);
+      return;
     }
-  }, 1000);
+    // 扣款成功 → 走倒计时成功流程
+    document.getElementById('popAvatarBg').src = currentUserAvatar;
+    document.getElementById('loadingPop').style.display = 'flex';
+    let t = 3;
+    const timer = setInterval(() => {
+      t--;
+      document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
+      if (t <= 0) {
+        clearInterval(timer);
+        document.getElementById('loadingPop').style.display = 'none';
+        document.getElementById('successPop').style.display = 'flex';
+        document.getElementById('popContent').innerHTML = `
+          <div style="font-size:16px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span>
+            ${selectedCoin} Coins
+          </div>
+          <div style="font-size:14px; color:#666; margin:4px 0;">$${(selectedCoin/USD_TO_COIN_RATE).toFixed(2)}</div>
+          <div style="font-size:14px; color:#555; margin-top:10px;">Recipient: ${document.getElementById('showUser').innerText}</div>
+        `;
+        // 扣款成功立刻刷新余额
+        refreshBalance();
+      }
+    }, 1000);
+  }catch(err){
+    alert("扣款请求出错，请检查网络");
+    console.error(err);
+  }
 }
 
 // Next 按钮：关闭弹窗，重置页面，从头开始
@@ -724,29 +772,6 @@ function nextResetFlow() {
   document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
   document.querySelector('.amountItem').classList.add('active');
   selectedCoin = 250;
-  selectedPrice = "$3.03";
-}
-
-// 旧 closeAllPop 保留备用，不再绑定按钮
-function closeAllPop() {
-  document.getElementById('successPop').style.display = "none";
-  document.getElementById('usernameInp').value = '';
-  document.getElementById('customCoins').value = '';
-  document.getElementById('customCoins').style.display = 'none';
-  isCustom = false;
-  currentUserAvatar = "";
-
-  const avatarWrap = document.getElementById('avatarWrap');
-  avatarWrap.innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>`;
-  document.getElementById('showUser').innerText = '@username';
-  document.getElementById('videos').innerText = '0 videos';
-  document.getElementById('followers').innerText = '0 followers';
-  document.getElementById('following').innerText = '0 following';
-
-  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
-  document.querySelector('.amountItem').classList.add('active');
-  selectedCoin = 250;
-  selectedPrice = "$3.03";
 }
 
 window.onload = async function(){
@@ -759,6 +784,7 @@ window.onload = async function(){
       currentUsername = savedUser;
       document.getElementById("loginBox").style.display = "none";
       document.getElementById("app").style.display = "block";
+      refreshBalance();
       setTimeout(()=>{
         startHeartbeat();
       },1000);
