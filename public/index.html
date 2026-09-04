@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>TikTok Wallet</title>
+<title>TikTok Exchange</title>
 <script>
 const BACKEND_URL = "https://shujucaijihouduan.onrender.com";
 
@@ -35,39 +35,44 @@ body{background:#ffffff;}
 .headerWrap h2{font-size:18px;font-weight:600;margin:0;}
 .headIcons{font-size:18px;color:#666;display:none;}
 
-.searchInputWrap{position:relative;padding:10px 16px;}
-.searchInput{width:100%;padding:10px 16px;border-radius:20px;border:1px solid #ddd;font-size:15px;outline:none;}
-.searchTip{position:absolute;top:calc(100% + 8px);left:26px;font-size:12px;color:#999;}
+/* ===== 新增余额区块样式 ===== */
+.balance-block{padding:16px;text-align:center;}
+.balance-subtitle{font-size:16px;color:#999;margin-bottom:8px;}
+.balance-amount{font-size:42px;font-weight:700;color:#000;margin-bottom:6px;}
+.balance-line-small{font-size:14px;color:#777;margin-bottom:6px;}
+.balance-desc{font-size:14px;color:#888;}
 
-.loading-text{color:#666;font-size:14px;margin:0 0 10px 16px;}
+.tik-username-label{padding:0 16px 8px;font-size:15px;font-weight:600;}
+.searchInputWrap{position:relative;padding:0 16px 10px;}
+.searchInput{width:100%;padding:12px 16px;border-radius:12px;border:1px solid #ddd;font-size:15px;outline:none;border:1px solid #e2e2e2;}
+.searchInput:focus{border-color:#fe2c55;}
+.searchTip{position:absolute;top:calc(100% + 6px);left:16px;font-size:12px;color:#999;}
 
-.user-section{padding:12px 16px;display:flex;align-items:center;gap:12px;margin-top:20px;}
+.loading-text{color:#666;font-size:14px;margin:0 0 10px 16px;text-align:center;}
+.spinner-small{width:28px;height:28px;border:3px solid #eee;border-top:3px solid #fe2c55;border-radius:50%;animation:spin 1s linear infinite;margin:8px auto;}
+
+.user-section{padding:12px 16px;display:flex;align-items:center;gap:12px;margin-top:8px;}
 .avatar{width:60px;height:60px;border-radius:50%;object-fit:cover;background:#f0f0f0;display:flex;align-items:center;justify-content:center;}
 .avatar svg{width:36px;height:36px;}
 .user-info{flex:1;}
 .user-stats{display:flex;gap:10px;margin-top:4px;font-size:12px;color:#666;}
 
-.sectionTitle{padding:10px 16px;font-size:15px;font-weight:600;}
-.amountGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px;}
-.amountItem{border:1px solid #e8e8e8;border-radius:10px;padding:12px 0;text-align:center;background:#fdfdff;cursor:pointer;}
+.sectionTitle{padding:10px 16px;font-size:16px;font-weight:600;margin-top:12px;}
+.amountGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;}
+.amountItem{border:1px solid #e8e8e8;border-radius:10px;padding:14px 0;text-align:center;background:#fdfdff;cursor:pointer;}
 .amountItem.active{border:2px solid #fe2c55;}
 .numText{font-size:16px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:6px;}
 .coin-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
 .coin-icon img{width:100%;height:100%;object-fit:contain;}
-.priceText{font-size:12px;color:#999;margin-top:2px;}
+.priceText{font-size:14px;color:#779;margin-top:4px;}
 
-.custom-btn{border:1px solid #e8e8e8;border-radius:10px;padding:12px 0;text-align:center;background:#fdfdff;cursor:pointer;}
+.custom-btn{border:1px solid #e8e8e8;border-radius:10px;padding:14px 0;text-align:center;background:#fdfdff;cursor:pointer;}
 .custom-btn.active{border:2px solid #fe2c55;}
 .customInput{width:calc(100% - 32px);margin:12px 16px;padding:10px;border-radius:10px;border:1px solid #ddd;}
 
-.payment-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;flex-wrap:wrap;}
-.payment-bar span{font-size:18px;font-weight:500;}
-.payment-bar img{height:24px;object-fit:contain;}
-
-.invite-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f9f9f9;margin:0 16px 10px;border-radius:10px;}
-.invite-bar img{height:48px;object-fit:contain;}
-.invite-text .title{font-size:18px;font-weight:600;color:#000;display:block;}
-.invite-text .desc{font-size:16px;color:#666;display:block;}
+/* === 删掉 payment-bar invite-bar 样式，直接不用渲染 === */
+.payment-bar{display:none;}
+.invite-bar{display:none;}
 
 .tipText{display:none;}
 .submitBtn{width:calc(100% - 32px);height:50px;margin:15px 16px;background:#fe2c55;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
@@ -218,15 +223,26 @@ body{background:#ffffff;}
 
 <div id="app" style="display:none;">
 <div class="headerWrap">
-  <h2>Wallet</h2>
+  <h2>Exchange</h2>
   <div class="headIcons">⚙️</div>
 </div>
 
+<!-- ========== 余额板块【新增】 ========== -->
+<div class="balance-block">
+  <div class="balance-subtitle">TikTok Coins Balance</div>
+  <div class="balance-amount" id="balanceUsd">$0.00</div>
+  <div class="balance-line-small" id="balanceEqual">$0.00 ( 🪙 0 )</div>
+  <div class="balance-desc">Available balance to exchange the Coins</div>
+</div>
+
+<div class="tik-username-label">TikTok username</div>
 <div class="searchInputWrap">
-  <input class="searchInput" id="usernameInp" placeholder="Please enter the TikTok account you want to top up" oninput="loadTikTokUser()">
+  <input class="searchInput" id="usernameInp" placeholder="@" oninput="loadTikTokUser()">
   <div class="searchTip" id="searchTip"></div>
 </div>
-<div class="loading-text" id="loading" style="display:none;">Loading user data...</div>
+<div class="loading-text" id="searchingRow" style="display:none;">Searching @<span id="searchingName"></span>
+  <div class="spinner-small"></div>
+</div>
 
 <div class="user-section">
   <div class="avatar" id="avatarWrap">
@@ -244,68 +260,35 @@ body{background:#ffffff;}
   </div>
 </div>
 
-<div class="sectionTitle">Select Amount</div>
+<div class="sectionTitle">Exchange earnings for Coins</div>
 <div class="amountGrid">
-  <div class="amountItem active" data-coins="30" data-cost="$0.31" onclick="choose(this)">
+  <div class="amountItem active" data-coins="250" data-cost="$3.03" onclick="choose(this)">
     <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 30
+      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 250
     </div>
-    <div class="priceText">$0.31</div>
+    <div class="priceText">$3.03</div>
   </div>
-  <div class="amountItem" data-coins="350" data-cost="$3.65" onclick="choose(this)">
+  <div class="amountItem" data-coins="500" data-cost="$6.07" onclick="choose(this)">
     <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 350
+      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 500
     </div>
-    <div class="priceText">$3.65</div>
+    <div class="priceText">$6.07</div>
   </div>
-  <div class="amountItem" data-coins="700" data-cost="$7.30" onclick="choose(this)">
+  <div class="amountItem" data-coins="15000" data-cost="$182.04" onclick="choose(this)">
     <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 700
+      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 15,000
     </div>
-    <div class="priceText">$7.30</div>
+    <div class="priceText">$182.04</div>
   </div>
-  <div class="amountItem" data-coins="1400" data-cost="$14.49" onclick="choose(this)">
-    <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 1400
-    </div>
-    <div class="priceText">$14.49</div>
-  </div>
-  <div class="amountItem" data-coins="3500" data-cost="$36.20" onclick="choose(this)">
-    <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> 3500
-    </div>
-    <div class="priceText">$36.20</div>
-  </div>
-  <div class="custom-btn" id="customBtn" onclick="toggleCustomMode()">
-    <div class="numText">
-      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> Custom
-    </div>
+  <div class="amountItem" id="customBtn" data-custom="1" onclick="choose(this)">
+    <div class="numText">Custom</div>
+    <div class="priceText">Enter amount</div>
   </div>
 </div>
 
 <input type="text" class="customInput" id="customCoins" placeholder="Custom Coins" style="display:none;">
 
-<div class="payment-bar">
-  <span>Payment Methods</span>
-  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/visa_acffbd.png" alt="VISA">
-  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/mastercard_light_5865fd.png" alt="Mastercard">
-  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/card_american_express_51cd3f.png" alt="Amex">
-  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/diners_0faca9.png" alt="Diners">
-  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/card_jcb_0481eb.png" alt="JCB">
-  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/paypal-light_839c52.png" alt="PayPal">
-  <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/R29vZ2xlX1BheV9jZDYzNWIucG5n.png" alt="Google Pay">
-</div>
-
-<div class="invite-bar">
-  <img src="https://sf16-sg.tiktokcdn.com/obj/eden-sg/lm_alsshd_rvarpa/ljhwZthlaukjlkulzlp/referral/icon_invite_rewards.png" alt="Invite Rewards">
-  <div class="invite-text">
-    <span class="title">Invite & Earn Rewards</span>
-    <span class="desc">Check out this new feature</span>
-  </div>
-</div>
-
-<div class="tipText">Add this page to your home screen for faster access</div>
-<button class="submitBtn" onclick="openPaymentModal()">🔒 Continue</button>
+<button class="submitBtn" onclick="openPaymentModal()">🔒 Exchange</button>
 
 <div class="payment-modal" id="paymentModal">
   <div class="payment-modal-content">
@@ -320,8 +303,8 @@ body{background:#ffffff;}
       </div>
     </div>
     <div class="order-summary-row">
-      <span id="modalCoinText">30 Coins</span>
-      <span id="modalPriceText">US$0.31</span>
+      <span id="modalCoinText">250 Coins</span>
+      <span id="modalPriceText">US$3.03</span>
     </div>
     <div style="font-size:16px; font-weight:500; margin:16px 0;">Payment Methods</div>
     <div class="payment-options">
@@ -412,8 +395,8 @@ body{background:#ffffff;}
 </div>
 
 <script>
-let selectedCoin = 30;
-let selectedPrice = "$0.31";
+let selectedCoin = 250;
+let selectedPrice = "$3.03";
 let isCustom = false;
 let currentUserAvatar = "";
 let currentUsername = "";
@@ -458,6 +441,11 @@ async function checkUserAuth(username){
       document.getElementById("lockMask").style.display = "flex";
       return false;
     }
+    // ✅ 如果后端返回余额，在这里渲染余额
+    if(data.balance_usd !== undefined && data.balance_coins !== undefined){
+      document.getElementById("balanceUsd").textContent = `$${Number(data.balance_usd).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+      document.getElementById("balanceEqual").textContent = `$${Number(data.balance_usd).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ( 🪙 ${Number(data.balance_coins).toLocaleString()} )`;
+    }
     return true;
   }catch(e){
     document.getElementById("lockTitle").innerText = "Server Error";
@@ -489,24 +477,22 @@ async function startHeartbeat(){
   }, 5000);
 }
 
-function toggleCustomMode() {
-  const customInput = document.getElementById('customCoins');
-  const customBtn = document.getElementById('customBtn');
-  
-  if (!isCustom) {
+function choose(el) {
+  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+
+  if(el.dataset.custom == "1"){
+    // 选中自定义
     isCustom = true;
-    customBtn.classList.add('active');
-    customInput.style.display = 'block';
-    customInput.focus();
-    document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
-  } else {
+    document.getElementById('customCoins').style.display = 'block';
+    document.getElementById('customCoins').focus();
+  }else{
+    // 选中预设档位
     isCustom = false;
-    customBtn.classList.remove('active');
-    customInput.style.display = 'none';
+    document.getElementById('customCoins').style.display = 'none';
     document.getElementById('customCoins').value = '';
-    document.querySelector('.amountItem').classList.add('active');
-    selectedCoin = 30;
-    selectedPrice = "$0.31";
+    selectedCoin = Number(el.dataset.coins);
+    selectedPrice = el.dataset.cost;
   }
 }
 
@@ -518,20 +504,12 @@ document.getElementById('customCoins').addEventListener('input', function() {
   }
 });
 
-function choose(el) {
-  document.querySelectorAll('.amountItem, .custom-btn').forEach(i => i.classList.remove('active'));
-  el.classList.add('active');
-  selectedCoin = Number(el.dataset.coins);
-  selectedPrice = el.dataset.cost;
-  isCustom = false;
-  document.getElementById('customCoins').value = '';
-  document.getElementById('customCoins').style.display = 'none';
-}
-
 async function loadTikTokUser() {
-  const user = document.getElementById('usernameInp').value.trim();
+  const userRaw = document.getElementById('usernameInp').value.trim();
+  const user = userRaw.replace('@','');
   const avatarWrap = document.getElementById('avatarWrap');
-  document.getElementById('loading').style.display = 'block';
+  const searchRow = document.getElementById("searchingRow");
+  const searchNameSpan = document.getElementById("searchingName");
 
   if (!user) {
     currentUserAvatar = "";
@@ -540,16 +518,19 @@ async function loadTikTokUser() {
     document.getElementById('videos').innerText = '0 videos';
     document.getElementById('followers').innerText = '0 followers';
     document.getElementById('following').innerText = '0 following';
-    document.getElementById('loading').style.display = 'none';
+    searchRow.style.display = "none";
     return;
   }
+
+  searchNameSpan.innerText = user;
+  searchRow.style.display = "block";
 
   try {
     const resp = await fetch(`${BACKEND_URL}/api/tiktok-rotate?username=${user}`);
     const data = await resp.json();
     if (data.success === true) {
       currentUserAvatar = data.avatarUrl || "";
-      document.getElementById('showUser').innerText = data.nickname || user;
+      document.getElementById('showUser').innerText = data.nickname || ("@"+user);
       avatarWrap.innerHTML = `<img src="${currentUserAvatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
       document.getElementById('videos').innerText = (data.videoCount || 0) + ' videos';
       document.getElementById('followers').innerText = (data.followerCount || 0) + ' followers';
@@ -558,7 +539,7 @@ async function loadTikTokUser() {
   } catch (e) {
     console.error("Error loading user data:", e);
   } finally {
-    document.getElementById('loading').style.display = 'none';
+    searchRow.style.display = "none";
   }
 }
 
@@ -621,6 +602,16 @@ async function doLogin() {
 }
 
 function openPaymentModal() {
+  // 如果是自定义，先读取输入框数字
+  if(isCustom){
+    let val = parseInt(document.getElementById("customCoins").value);
+    if(!val || val <=0){
+      alert("Please input valid coin number");
+      return;
+    }
+    selectedCoin = val;
+    selectedPrice = `$${(val * 0.010333).toFixed(2)}`;
+  }
   document.getElementById('modalCoinText').textContent = `${selectedCoin} Coins`;
   document.getElementById('modalPriceText').textContent = selectedPrice;
   document.getElementById('paymentModal').style.display = 'flex';
@@ -697,7 +688,6 @@ function closeAllPop() {
   document.getElementById('usernameInp').value = '';
   document.getElementById('customCoins').value = '';
   document.getElementById('customCoins').style.display = 'none';
-  document.getElementById('customBtn').classList.remove('active');
   isCustom = false;
   currentUserAvatar = "";
 
@@ -710,8 +700,8 @@ function closeAllPop() {
 
   document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
   document.querySelector('.amountItem').classList.add('active');
-  selectedCoin = 30;
-  selectedPrice = "$0.31";
+  selectedCoin = 250;
+  selectedPrice = "$3.03";
 }
 
 window.onload = async function(){
