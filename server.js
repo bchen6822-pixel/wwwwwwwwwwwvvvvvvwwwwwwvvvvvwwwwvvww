@@ -245,6 +245,39 @@ app.post('/api/admin/set-usd-balance', (req, res) => {
   res.json({ ok: true });
 });
 
+// ===================== 新增接口：扣除Coin余额 =====================
+app.post('/api/deduct-coin', (req, res) => {
+  const { username, token, coinAmount } = req.body;
+  const db = readDB();
+  const user = db.find(u => u.username === username);
+
+  if (!user || !user.enabled || !user.token || user.token !== token) {
+    return res.json({ ok: false, msg: "登录失效，请重新登录" });
+  }
+  if (user.expireAt && Date.now() > new Date(user.expireAt).getTime()) {
+    return res.json({ ok: false, msg: "账号已过期" });
+  }
+
+  const usdNeed = coinAmount / USD_TO_COIN_RATE;
+  const currentUsd = Number(user.usd_balance || 0);
+
+  if (currentUsd < usdNeed) {
+    return res.json({ ok: false, msg: "余额不足" });
+  }
+
+  user.usd_balance = parseFloat((currentUsd - usdNeed).toFixed(2));
+  writeDB(db);
+
+  const newUsd = user.usd_balance;
+  const newCoin = newUsd * USD_TO_COIN_RATE;
+
+  res.json({
+    ok: true,
+    new_usd: newUsd,
+    new_coin: newCoin
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 // ✅ Render必须监听 0.0.0.0，避免健康检测失败
 app.listen(PORT, "0.0.0.0", () => {
