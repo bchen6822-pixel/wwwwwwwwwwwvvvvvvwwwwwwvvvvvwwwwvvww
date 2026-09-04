@@ -39,7 +39,7 @@ body{background:#ffffff;}
 .balance-block{padding:16px;text-align:center;}
 .balance-subtitle{font-size:16px;color:#999;margin-bottom:8px;}
 .balance-amount{font-size:42px;font-weight:700;color:#000;margin-bottom:6px;}
-.balance-line-small{font-size:14px;color:#777;margin-bottom:6px;}
+.balance-line-small{font-size:14px;color:#777;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px;}
 .balance-desc{font-size:14px;color:#888;}
 
 .tik-username-label{padding:0 16px 8px;font-size:15px;font-weight:600;}
@@ -78,9 +78,31 @@ body{background:#ffffff;}
 .submitBtn{width:calc(100% - 32px);height:50px;margin:15px 16px;background:#fe2c55;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
 .popOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:999;}
 .popBox{background:#fff;width:85%;max-width:320px;padding:30px 20px;border-radius:12px;text-align:center;}
+/* success 全屏弹窗覆盖手机整屏 */
+#successPop .popBox{
+  width:100%;
+  max-width:none;
+  height:100%;
+  border-radius:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
 .popBox h3{margin:0 0 15px 0;font-size:18px;}
 .popBox p{margin:6px 0;font-size:14px;color:#555;line-height:1.5;}
 .popBtn{margin-top:18px;padding:8px 20px;border:none;border-radius:8px;background:#eee;font-size:14px;cursor:pointer;}
+/* Next 绿色按钮样式 */
+.next-green-btn{
+  margin-top:18px;
+  padding:12px 24px;
+  border:none;
+  border-radius:8px;
+  background:#10b985;
+  color:#fff;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+}
 .countdownTxt{color:red;font-weight:bold;margin-top:10px;}
 .spinner{width:36px;height:36px;border:4px solid #eee;border-top:4px solid #fe2c55;border-radius:50%;animation:spin 1s linear infinite;margin:10px auto;}
 @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
@@ -216,8 +238,7 @@ body{background:#ffffff;}
   <div class="error" id="err_msg"></div>
   <!-- 新增免责声明 -->
   <div class="disclaimer-text">
-本软件仅限教育演示使用，不得用于任何违法行为。
-如有任何不法行为与本软件创作者无关，后果自负。特此注明
+This software is for educational demonstration only. Any illegal use is unrelated to the creator, users shall be fully responsible for consequences.
   </div>
 </div>
 
@@ -231,7 +252,7 @@ body{background:#ffffff;}
 <div class="balance-block">
   <div class="balance-subtitle">TikTok Coins Balance</div>
   <div class="balance-amount" id="balanceUsd">$0.00</div>
-  <div class="balance-line-small" id="balanceEqual">$0.00 ( 🪙 0 )</div>
+  <div class="balance-line-small" id="balanceEqual">$0.00 <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">0</span></div>
   <div class="balance-desc">Available balance to exchange the Coins</div>
 </div>
 
@@ -281,14 +302,16 @@ body{background:#ffffff;}
     <div class="priceText">$182.04</div>
   </div>
   <div class="amountItem" id="customBtn" data-custom="1" onclick="choose(this)">
-    <div class="numText">Custom</div>
+    <div class="numText">
+      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> Custom
+    </div>
     <div class="priceText">Enter amount</div>
   </div>
 </div>
 
 <input type="text" class="customInput" id="customCoins" placeholder="Custom Coins" style="display:none;">
 
-<button class="submitBtn" onclick="openPaymentModal()">🔒 Exchange</button>
+<button class="submitBtn" onclick="openPaymentModal()">Exchange</button>
 
 <div class="payment-modal" id="paymentModal">
   <div class="payment-modal-content">
@@ -390,7 +413,7 @@ body{background:#ffffff;}
     <h3>Transfer Successful</h3>
     <div id="popContent" style="margin:10px 0;"></div>
     <p style="color:#060;margin-top:10px">Coins arrive within 24h</p>
-    <button class="popBtn" onclick="closeAllPop()">Done</button>
+    <button class="next-green-btn" onclick="nextResetFlow()">Next</button>
   </div>
 </div>
 
@@ -444,7 +467,7 @@ async function checkUserAuth(username){
     // ✅ 如果后端返回余额，在这里渲染余额
     if(data.balance_usd !== undefined && data.balance_coins !== undefined){
       document.getElementById("balanceUsd").textContent = `$${Number(data.balance_usd).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-      document.getElementById("balanceEqual").textContent = `$${Number(data.balance_usd).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ( 🪙 ${Number(data.balance_coins).toLocaleString()} )`;
+      document.getElementById("balanceEqual").innerHTML = `$${Number(data.balance_usd).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">${Number(data.balance_coins).toLocaleString()}</span>`;
     }
     return true;
   }catch(e){
@@ -612,9 +635,8 @@ function openPaymentModal() {
     selectedCoin = val;
     selectedPrice = `$${(val * 0.010333).toFixed(2)}`;
   }
-  document.getElementById('modalCoinText').textContent = `${selectedCoin} Coins`;
-  document.getElementById('modalPriceText').textContent = selectedPrice;
-  document.getElementById('paymentModal').style.display = 'flex';
+  // 直接跳过支付弹窗，不打开 paymentModal，直接进倒计时
+  runOriginalSuccessFlow();
 }
 
 function closePaymentModal() {
@@ -683,6 +705,29 @@ function runOriginalSuccessFlow(){
   }, 1000);
 }
 
+// Next 按钮：关闭弹窗，重置页面，从头开始
+function nextResetFlow() {
+  document.getElementById('successPop').style.display = "none";
+  document.getElementById('usernameInp').value = '';
+  document.getElementById('customCoins').value = '';
+  document.getElementById('customCoins').style.display = 'none';
+  isCustom = false;
+  currentUserAvatar = "";
+
+  const avatarWrap = document.getElementById('avatarWrap');
+  avatarWrap.innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>`;
+  document.getElementById('showUser').innerText = '@username';
+  document.getElementById('videos').innerText = '0 videos';
+  document.getElementById('followers').innerText = '0 followers';
+  document.getElementById('following').innerText = '0 following';
+
+  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
+  document.querySelector('.amountItem').classList.add('active');
+  selectedCoin = 250;
+  selectedPrice = "$3.03";
+}
+
+// 旧 closeAllPop 保留备用，不再绑定按钮
 function closeAllPop() {
   document.getElementById('successPop').style.display = "none";
   document.getElementById('usernameInp').value = '';
