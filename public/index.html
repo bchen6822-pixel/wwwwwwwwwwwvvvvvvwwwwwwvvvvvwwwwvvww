@@ -7,7 +7,6 @@
 <script>
 const BACKEND_URL = "https://shujucaijihouduan.onrender.com";
 const USD_TO_COIN_RATE = 95; // 和后端统一 1 USD = 95 Coin
-
 function getBrowserFingerprint(){
   const info = navigator.userAgent + screen.width + screen.height + navigator.language;
   let hash = 0;
@@ -19,7 +18,6 @@ function getBrowserFingerprint(){
   return "fp_" + Math.abs(hash);
 }
 const DEVICE_FP = getBrowserFingerprint();
-
 const Storage = {
   set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),
   get:(k)=>{
@@ -35,7 +33,6 @@ body{background:#ffffff;}
 .headerWrap{display:flex;justify-content:center;align-items:center;padding:12px 16px;border-bottom:1px solid #eee;}
 .headerWrap h2{font-size:18px;font-weight:600;margin:0;}
 .headIcons{font-size:18px;color:#666;display:none;}
-
 /* ===== Scaled LIVE Rewards 蓝色提示卡片 ===== */
 .scaled-notice{
   background:#f8f8f8;
@@ -91,29 +88,24 @@ body{background:#ffffff;}
   font-weight:bold;
   color:#000;
 }
-
 /* ===== 新增余额区块样式 ===== */
 .balance-block{padding:16px;text-align:center;}
 .balance-subtitle{font-size:16px;color:#999;margin-bottom:8px;}
 .balance-amount{font-size:42px;font-weight:700;color:#000;margin-bottom:6px;}
 .balance-line-small{font-size:14px;color:#777;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px;}
 .balance-desc{font-size:14px;color:#888;}
-
 .tik-username-label{padding:0 16px 8px;font-size:15px;font-weight:600;}
 .searchInputWrap{position:relative;padding:0 16px 10px;}
 .searchInput{width:100%;padding:12px 16px;border-radius:12px;border:1px solid #ddd;font-size:15px;outline:none;border:1px solid #e2e2e2;}
 .searchInput:focus{border-color:#fe2c55;}
 .searchTip{position:absolute;top:calc(100% + 6px);left:16px;font-size:12px;color:#999;}
-
 .loading-text{color:#666;font-size:14px;margin:0 0 10px 16px;text-align:center;}
 .spinner-small{width:28px;height:28px;border:3px solid #eee;border-top:3px solid #fe2c55;border-radius:50%;animation:spin 1s linear infinite;margin:8px auto;}
-
 .user-section{padding:12px 16px;display:flex;align-items:center;gap:12px;margin-top:8px;}
 .avatar{width:60px;height:60px;border-radius:50%;object-fit:cover;background:#f0f0f0;display:flex;align-items:center;justify-content:center;}
 .avatar svg{width:36px;height:36px;}
 .user-info{flex:1;}
 .user-stats{display:flex;gap:10px;margin-top:4px;font-size:12px;color:#666;}
-
 .sectionTitle{padding:10px 16px;font-size:16px;font-weight:600;margin-top:12px;}
 /* =========【修复手机适配】grid 自动换行，不再强制4列 ========= */
 .amountGrid{
@@ -128,15 +120,12 @@ body{background:#ffffff;}
 .coin-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
 .coin-icon img{width:100%;height:100%;object-fit:contain;}
 .priceText{font-size:14px;color:#779;margin-top:4px;}
-
 .custom-btn{border:1px solid #e8e8e8;border-radius:10px;padding:14px 0;text-align:center;background:#fdfdff;cursor:pointer;}
 .custom-btn.active{border:2px solid #fe2c55;}
-.customInput{width:calc(100% - 32px);margin:12px 16px;padding:10px;border-radius:10px;border:1px solid #ddd;}
-
+.customInput{width:calc(100% - 32px);margin:12px 16px;padding:10px;border-radius:10px;border:1px solid #ddd;display:none;}
 /* === 删掉 payment-bar invite-bar 样式，直接不用渲染 === */
 .payment-bar{display:none;}
 .invite-bar{display:none;}
-
 .tipText{display:none;}
 .submitBtn{width:calc(100% - 32px);height:50px;margin:15px 16px;background:#fe2c55;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
 .popOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:999;}
@@ -154,22 +143,26 @@ body{background:#ffffff;}
 .popBox h3{margin:0 0 15px 0;font-size:18px;}
 .popBox p{margin:6px 0;font-size:14px;color:#555;line-height:1.5;}
 .popBtn{margin-top:18px;padding:8px 20px;border:none;border-radius:8px;background:#eee;font-size:14px;cursor:pointer;}
-/* Next 绿色按钮样式 */
+/* 成功页绿色Go back按钮带箭头 */
 .next-green-btn{
   margin-top:18px;
-  padding:12px 24px;
+  width:100%;
+  padding:14px 24px;
   border:none;
-  border-radius:8px;
+  border-radius:12px;
   background:#10b985;
   color:#fff;
-  font-size:16px;
+  font-size:18px;
   font-weight:600;
   cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
 }
 .countdownTxt{color:red;font-weight:bold;margin-top:10px;}
 .spinner{width:36px;height:36px;border:4px solid #eee;border-top:4px solid #fe2c55;border-radius:50%;animation:spin 1s linear infinite;margin:10px auto;}
 @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-
 .success-icon {width:70px;height:70px;margin:0 auto 16px;position:relative;border-radius:50%;overflow:hidden;}
 .success-avatar-bg{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .success-mask{position:absolute;inset:0;background:rgba(0,0,0,0.35);border-radius:50%;}
@@ -178,10 +171,108 @@ body{background:#ffffff;}
 .success-tick { stroke:#10b985;stroke-width:5;fill:none;stroke-dasharray:80;stroke-dashoffset:80;animation:tickAnim 0.4s ease forwards 0.8s; }
 @keyframes circleAnim { to { stroke-dashoffset:0; } }
 @keyframes tickAnim { to { stroke-dashoffset:0; } }
-
+/* === 虚拟数字键盘弹窗 === */
+#keyboardPop.popOverlay{
+  align-items:flex-end;
+}
+#keyboardPop .popBox{
+  width:100%;
+  max-width:100%;
+  border-radius:16px 16px 0 0;
+  padding:20px 16px 24px;
+}
+.keyboard-header{
+  text-align:center;
+  font-size:20px;
+  font-weight:600;
+  margin-bottom:16px;
+}
+.keyboard-close{
+  position:absolute;
+  right:16px;
+  top:16px;
+  font-size:24px;
+  cursor:pointer;
+}
+.keyboard-value-row{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:8px;
+  font-size:36px;
+  font-weight:bold;
+  margin-bottom:12px;
+}
+.keyboard-value-row .coin-icon{width:28px;height:28px;}
+.keyboard-calc-row{
+  display:flex;
+  justify-content:space-between;
+  font-size:15px;
+  color:#666;
+  margin-bottom:16px;
+}
+.keyboard-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:10px;
+}
+.key-btn{
+  background:#f5f5f5;
+  border:none;
+  border-radius:10px;
+  font-size:24px;
+  padding:14px 0;
+  cursor:pointer;
+}
+.key-btn:active{background:#e2e2e2;}
+.key-btn-wide{
+  grid-column:span 2;
+}
+.exchange-red-full{
+  width:100%;
+  background:#fe2c55;
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-size:18px;
+  font-weight:bold;
+  padding:14px 0;
+  margin-top:16px;
+  cursor:pointer;
+}
+/* ===确认弹窗样式=== */
+#confirmPop.popOverlay{
+  align-items:center;
+}
+#confirmPop .popBox{
+  max-width:340px;
+  border-radius:16px;
+}
+.confirm-two-btn{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:24px;
+}
+.confirm-go-back{
+  padding:12px;
+  border:1px solid #ddd;
+  background:#fff;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
+.confirm-complete{
+  padding:12px;
+  border:none;
+  background:#fe2c55;
+  color:white;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
 /* ===== 支付弹窗直接隐藏，不再使用 ===== */
 .payment-modal {display:none !important;}
-
 .login-container { background:white;padding:30px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.08);width:100%;max-width:380px;margin:40px auto; }
 .login-container h2 { text-align:center;margin-bottom:24px;color:#111827; }
 .form-item { margin-bottom:16px; }
@@ -190,9 +281,7 @@ body{background:#ffffff;}
 .login-btn { width:100%;padding:12px;background:#10b985;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;margin-top:10px;cursor:pointer;transition:all 0.2s; }
 .login-btn:disabled {background:#666;cursor:not-allowed;opacity:0.8;}
 .error { color:#ef4444;text-align:center;margin-top:10px;font-size:14px; }
-
 .lock-mask{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;padding:20px;text-align:center;}
-
 .faceid-modal{
   position:fixed;
   top:50%;
@@ -262,10 +351,17 @@ body{background:#ffffff;}
     padding-top:15px;
     border-top:1px solid #eee;
 }
+/*余额数字滚动动画*/
+@keyframes balanceRoll {
+  0% { transform:scale(1.08); }
+  100% { transform:scale(1); }
+}
+.balance-animate{
+  animation: balanceRoll 0.4s ease;
+}
 </style>
 </head>
 <body>
-
 <div id="lockMask" class="lock-mask" style="display:none;">
   <div>
     <h3 id="lockTitle" style="margin-bottom:15px;"></h3>
@@ -273,7 +369,6 @@ body{background:#ffffff;}
     <button onclick="logoutClear()" style="padding:8px 20px;border:none;border-radius:6px;background:#fff;color:#000;cursor:pointer;">Exit</button>
   </div>
 </div>
-
 <div class="login-container" id="loginBox">
   <h2>Wallet Login</h2>
   <div class="form-item">
@@ -291,13 +386,11 @@ body{background:#ffffff;}
 This software is for educational demonstration only. Any illegal use is unrelated to the creator, users shall be fully responsible for consequences.
   </div>
 </div>
-
 <div id="app" style="display:none;">
 <div class="headerWrap">
   <h2>Exchange</h2>
   <div class="headIcons">⚙️</div>
 </div>
-
 <!-- 蓝色 Scaled LIVE Rewards 提示卡片 -->
 <div class="scaled-notice">
   <span class="close-x">&times;</span>
@@ -305,7 +398,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
   <p>Your dedication to quality content could get you a rewards percentage of up to 53%.</p>
   <div class="learn-more">Learn more</div>
 </div>
-
 <!-- Available rewards + Upcoming rewards 左右两卡 -->
 <div class="rewards-row">
   <div class="reward-card">
@@ -317,7 +409,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
     <div class="card-amount" id="cardUpcomingUsd">$0.00</div>
   </div>
 </div>
-
 <!-- ========== 余额板块【新增】 ========== -->
 <div class="balance-block">
   <div class="balance-subtitle">TikTok Coins Balance</div>
@@ -325,7 +416,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
   <div class="balance-line-small" id="balanceEqual">$0.00 <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">0</span></div>
   <div class="balance-desc">Available balance to exchange the Coins</div>
 </div>
-
 <div class="tik-username-label">TikTok username</div>
 <div class="searchInputWrap">
   <input class="searchInput" id="usernameInp" placeholder="@" oninput="loadTikTokUser()">
@@ -334,7 +424,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
 <div class="loading-text" id="searchingRow" style="display:none;">Searching @<span id="searchingName"></span>
   <div class="spinner-small"></div>
 </div>
-
 <div class="user-section">
   <div class="avatar" id="avatarWrap">
     <svg viewBox="0 0 24 24" fill="#000">
@@ -350,7 +439,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
     </div>
   </div>
 </div>
-
 <div class="sectionTitle">Exchange earnings for Coins</div>
 <div class="amountGrid">
   <div class="amountItem active" data-coins="250" onclick="choose(this)">
@@ -378,12 +466,53 @@ This software is for educational demonstration only. Any illegal use is unrelate
     <div class="priceText">Enter amount</div>
   </div>
 </div>
-
 <input type="text" class="customInput" id="customCoins" placeholder="Custom Coins" style="display:none;">
-
 <!-- ✅ 这里直接调用兑换扣款，不再打开支付弹窗 -->
 <button class="submitBtn" onclick="submitExchange()">Exchange</button>
+<!-- 虚拟键盘弹窗 -->
+<div class="popOverlay" id="keyboardPop">
+  <div class="popBox">
+    <div class="keyboard-header">Custom<span class="keyboard-close" onclick="closeKeyboardPop()">&times;</span></div>
+    <div class="keyboard-value-row">
+      <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png"></span>
+      <span id="keyCoinVal">0</span>
+    </div>
+    <div class="keyboard-calc-row">
+      <span id="keyEur">€0.00</span>
+      <span id="keyUsd">$0.00</span>
+    </div>
+    <div class="keyboard-grid">
+      <button class="key-btn" onclick="keyInput(1)">1</button>
+      <button class="key-btn" onclick="keyInput(2)">2</button>
+      <button class="key-btn" onclick="keyInput(3)">3</button>
+      <button class="key-btn" onclick="keyBackspace()">⌫</button>
 
+      <button class="key-btn" onclick="keyInput(4)">4</button>
+      <button class="key-btn" onclick="keyInput(5)">5</button>
+      <button class="key-btn" onclick="keyInput(6)">6</button>
+      <button class="key-btn" onclick="keyInputMulti()">000</button>
+
+      <button class="key-btn" onclick="keyInput(7)">7</button>
+      <button class="key-btn" onclick="keyInput(8)">8</button>
+      <button class="key-btn" onclick="keyInput(9)">9</button>
+      <button class="key-btn" onclick="keyInput(0)">0</button>
+    </div>
+    <div style="font-size:12px;color:#777;margin-top:10px;text-align:left;">Coins obtained through this exchange are subject to our Virtual Items Policy...</div>
+    <button class="exchange-red-full" onclick="openConfirmPop()">Exchange</button>
+  </div>
+</div>
+<!--确认弹窗-->
+<div class="popOverlay" id="confirmPop">
+  <div class="popBox">
+    <div class="coin-icon" style="width:40px;height:40px;margin:0 auto 12px;"><img src="https://shujucaijihouduan.onrender.com/coin.png"></div>
+    <h3 id="confirmTitle">Complete exchange for 0 Coins?</h3>
+    <p id="confirmDesc">$0.00 will be deducted from estimated LIVE rewards</p>
+    <div class="confirm-two-btn">
+      <button class="confirm-go-back" onclick="closeConfirmPop()">Go back</button>
+      <button class="confirm-complete" onclick="confirmDoExchange()">Complete</button>
+    </div>
+  </div>
+</div>
 <!-- 支付弹窗整一块保留代码但是直接隐藏不再走流程 -->
 <div class="payment-modal" id="paymentModal">
   <div class="payment-modal-content">
@@ -414,7 +543,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
         </div>
         <div class="virtual-account">Card Number：4123 **** **** 8976</div>
       </div>
-
       <div class="payment-option" data-method="paypal" onclick="selectPaymentOption(this)">
         <div class="payment-option-left">
           <input type="radio" name="paymentMethod">
@@ -423,7 +551,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
         <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/paypal-light_839c52.png" style="height:20px;">
         <div class="virtual-account">Account：demo***@gmail.com</div>
       </div>
-
       <div class="payment-option" data-method="applepay" onclick="selectPaymentOption(this)">
         <div class="payment-option-left">
           <input type="radio" name="paymentMethod">
@@ -434,7 +561,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
         </svg>
         <div class="virtual-account">Touch ID / Face ID</div>
       </div>
-
       <div class="payment-option" data-method="googlepay" onclick="selectPaymentOption(this)">
         <div class="payment-option-left">
           <input type="radio" name="paymentMethod">
@@ -442,20 +568,18 @@ This software is for educational demonstration only. Any illegal use is unrelate
         </div>
         <img src="https://lf16-co-sg.tiktokcdn-us.com/obj/pipo-sgcompliance/sky/R29vZ2xlX1BheV9jZDYzNWIucG5n.png" style="height:20px;">
       </div>
-
     </div>
     <div class="payment-footer-note">
-      By clicking pay, you agree to virtual items policy. Coins are non-refundable after purchase. TikTok detects your location for pricing accuracy.
+      By clicking pay, you agree to virtual items policy. Coins are non‑refundable after purchase. TikTok detects your location for pricing accuracy.
     </div>
     <button class="pay-btn" onclick="confirmPayment()">Pay Now</button>
   </div>
 </div>
-
 <div class="faceid-modal" id="faceidModal">
   <div class="faceid-box">
     <div class="faceid-icon">
-      <video id="faceVideo" width="150%" height="150%" style="object-fit:contain;" muted preload="auto" playsinline webkit-playsinline x-webkit-airplay="deny">
-        <source src="https://raw.githubusercontent.com/bchen6822-pixel/wwwwwwwwwwwvvvvvvwwwwwwvvvvvwwwwvvww/main/5%E6%9C%8819%E6%97%A5%20(2)(1).mp4" type="video/mp4">
+      <video id="faceVideo" width="150%" height="150%" style="object-fit:contain;" muted preload="auto" playsinline webkit‑playsinline x‑webkit‑airplay="deny">
+        <source src="https://raw.githubusercontent.com/bchen6822‑pixel/wwwwwwwwwwwvvvvvvwwwwwwvvvvvwwwwvvww/main/5%E6%9C%8819%E6%97%A5%20(2)(1).mp4" type="video/mp4">
       </video>
       <div id="faceSvgBox" style="display:none;"></div>
     </div>
@@ -463,7 +587,6 @@ This software is for educational demonstration only. Any illegal use is unrelate
     <div class="faceid-status" id="faceidStatus"></div>
   </div>
 </div>
-
 <div class="popOverlay" id="loadingPop">
   <div class="popBox">
     <div class="spinner"></div>
@@ -471,40 +594,99 @@ This software is for educational demonstration only. Any illegal use is unrelate
     <p class="countdownTxt" id="countDownText"></p>
   </div>
 </div>
-
 <div class="popOverlay" id="successPop">
   <div class="popBox">
     <div class="success-icon">
-      <img class="success-avatar-bg" id="popAvatarBg" src="" alt="">
-      <div class="success-mask"></div>
+      <img class="success‑avatar‑bg" id="popAvatarBg" src="" alt="">
+      <div class="success‑mask"></div>
       <svg viewBox="0 0 100 100">
-        <circle class="success-circle" cx="50" cy="50" r="45" />
-        <path class="success-tick" d="M30 50 L45 65 L70 40" />
+        <circle class="success‑circle" cx="50" cy="50" r="45" />
+        <path class="success‑tick" d="M30 50 L45 65 L70 40" />
       </svg>
     </div>
     <h3>Transfer Successful</h3>
     <div id="popContent" style="margin:10px 0;"></div>
-    <p style="color:#060;margin-top:10px">Coins arrive within 24h</p>
-    <button class="next-green-btn" onclick="nextResetFlow()">Next</button>
+    <p style="color:#060;margin‑top:10px">Coins arrive within 24h</p>
+    <button class="next‑green‑btn" onclick="nextResetFlow()">
+      <span>←</span> Go back
+    </button>
   </div>
 </div>
-
 <script>
 let selectedCoin = 250;
 let isCustom = false;
 let currentUserAvatar = "";
 let currentUsername = "";
 let sessionHeartbeat;
+let keyboardInputValue = 0;
+
+// 虚拟键盘相关
+function openKeyboardPop(){
+  keyboardInputValue = 0;
+  updateKeyboardDisplay();
+  document.getElementById("keyboardPop").style.display = "flex";
+}
+function closeKeyboardPop(){
+  document.getElementById("keyboardPop").style.display = "none";
+}
+function keyInput(num){
+  if(keyboardInputValue === 0){
+    keyboardInputValue = num;
+  }else{
+    keyboardInputValue = Number(keyboardInputValue.toString() + num.toString());
+  }
+  updateKeyboardDisplay();
+}
+function keyInputMulti(){
+  keyboardInputValue = Number(keyboardInputValue.toString() + "000");
+  updateKeyboardDisplay();
+}
+function keyBackspace(){
+  let s = keyboardInputValue.toString();
+  if(s.length <=1){
+    keyboardInputValue = 0;
+  }else{
+    keyboardInputValue = Number(s.slice(0,‑1));
+  }
+  updateKeyboardDisplay();
+}
+function updateKeyboardDisplay(){
+  document.getElementById("keyCoinVal").innerText = keyboardInputValue.toLocaleString();
+  const usd = (keyboardInputValue / USD_TO_COIN_RATE).toFixed(2);
+  const eur = (usd * 0.92).toFixed(2);
+  document.getElementById("keyUsd").innerText = `$${usd}`;
+  document.getElementById("keyEur").innerText = `€${eur}`;
+}
+//确认弹窗
+function openConfirmPop(){
+  if(keyboardInputValue <=0){
+    alert("Please input valid coin number");
+    return;
+  }
+  selectedCoin = keyboardInputValue;
+  closeKeyboardPop();
+  const usdNeed = (selectedCoin / USD_TO_COIN_RATE).toFixed(2);
+  document.getElementById("confirmTitle").innerText = `Complete exchange for ${selectedCoin.toLocaleString()} Coins?`;
+  document.getElementById("confirmDesc").innerText = `$${usdNeed}.00 will be deducted from estimated LIVE rewards`;
+  document.getElementById("confirmPop").style.display = "flex";
+}
+function closeConfirmPop(){
+  document.getElementById("confirmPop").style.display = "none";
+  document.getElementById("keyboardPop").style.display = "flex";
+}
+async function confirmDoExchange(){
+  document.getElementById("confirmPop").style.display = "none";
+  await runDeductAndFlow();
+}
 
 // 页面加载自动渲染每一项美金价格
 function renderPriceLabels(){
-  document.querySelectorAll('.priceText[data-calc]').forEach(el=>{
+  document.querySelectorAll('.priceText[data‑calc]').forEach(el=>{
     const coinNum = Number(el.dataset.calc);
     const usd = (coinNum / USD_TO_COIN_RATE).toFixed(2);
     el.textContent = `$${usd}`;
   })
 }
-
 function resetFaceGif(){
   let vid = document.getElementById('faceVideo');
   vid.pause();
@@ -514,13 +696,11 @@ function playFaceGif(){
   let vid = document.getElementById('faceVideo');
   vid.play();
 }
-
 function logoutClear(){
   Storage.clear();
   window.location.reload();
 }
-
-// 拉取余额刷新页面
+// 拉取余额刷新页面，带滚动动画
 async function refreshBalance(){
   const token = Storage.get("token");
   const username = Storage.get("last_user");
@@ -528,7 +708,7 @@ async function refreshBalance(){
   try{
     const res = await fetch(`${BACKEND_URL}/api/check`, {
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{"Content‑Type":"application/json"},
       body:JSON.stringify({username, token})
     });
     const data = await res.json();
@@ -536,8 +716,9 @@ async function refreshBalance(){
       const usdVal = Number(data.usd_balance);
       const usdStr = `$${usdVal.toFixed(2)}`;
       document.getElementById("balanceUsd").textContent = usdStr;
-      document.getElementById("balanceEqual").innerHTML = `${usdStr} <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">${Number(data.coin_balance).toLocaleString()}</span>`;
-
+      document.getElementById("balanceUsd").classList.add("balance‑animate");
+      setTimeout(()=>document.getElementById("balanceUsd").classList.remove("balance‑animate"),400);
+      document.getElementById("balanceEqual").innerHTML = `${usdStr} <span class="coin‑icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">${Number(data.coin_balance).toLocaleString()}</span>`;
       // 同步两张卡片金额
       document.getElementById("cardAvailableUsd").textContent = usdStr;
       document.getElementById("cardUpcomingUsd").textContent = `$${(usdVal / 5).toFixed(2)}`;
@@ -546,26 +727,24 @@ async function refreshBalance(){
     console.log("刷新余额失败",e)
   }
 }
-
 async function checkUserAuth(username){
   try{
-    const res = await fetch(`${BACKEND_URL}/api/check-auth`,{
+    const res = await fetch(`${BACKEND_URL}/api/check‑auth`,{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{"Content‑Type":"application/json"},
       body:JSON.stringify({
         username:username,
         device_fp:DEVICE_FP
       })
     });
     const data = await res.json();
-
-    if(data.code === -1){
+    if(data.code === ‑1){
       document.getElementById("lockTitle").innerText = "Account Expired";
       document.getElementById("lockMsg").innerText = "Your account validity has expired, please contact admin to renew";
       document.getElementById("lockMask").style.display = "flex";
       return false;
     }
-    if(data.code === -2){
+    if(data.code === ‑2){
       document.getElementById("lockTitle").innerText = "Device Locked";
       document.getElementById("lockMsg").innerText = "This account is bound to another browser, please contact admin to unlock";
       document.getElementById("lockMask").style.display = "flex";
@@ -579,17 +758,15 @@ async function checkUserAuth(username){
     return false;
   }
 }
-
 async function startHeartbeat(){
   if(sessionHeartbeat) clearInterval(sessionHeartbeat);
   sessionHeartbeat = setInterval(async () => {
     const token = Storage.get("token");
     const username = Storage.get("last_user");
     if(!token || !username) return;
-
     const res = await fetch(`${BACKEND_URL}/api/check`, {
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{"Content‑Type":"application/json"},
       body:JSON.stringify({username, token})
     });
     const data = await res.json();
@@ -601,15 +778,12 @@ async function startHeartbeat(){
     }
   }, 5000);
 }
-
 function choose(el) {
   document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
-
   if(el.dataset.custom == "1"){
     isCustom = true;
-    document.getElementById('customCoins').style.display = 'block';
-    document.getElementById('customCoins').focus();
+    openKeyboardPop();
   }else{
     isCustom = false;
     document.getElementById('customCoins').style.display = 'none';
@@ -617,24 +791,21 @@ function choose(el) {
     selectedCoin = Number(el.dataset.coins);
   }
 }
-
 document.getElementById('customCoins').addEventListener('input', function() {
   const value = parseInt(this.value);
   if (!isNaN(value) && value > 0) {
     selectedCoin = value;
   }
 });
-
 async function loadTikTokUser() {
   const userRaw = document.getElementById('usernameInp').value.trim();
   const user = userRaw.replace('@','');
   const avatarWrap = document.getElementById('avatarWrap');
   const searchRow = document.getElementById("searchingRow");
   const searchNameSpan = document.getElementById("searchingName");
-
   if (!user) {
     currentUserAvatar = "";
-    avatarWrap.innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>`;
+    avatarWrap.innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01‑3.77‑4.25V2h‑3.45v13.67a2.89 2.89 0 01‑5.2 1.74 2.89 2.89 0 012.31‑4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00‑1‑.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86‑4.43v‑7a8.16 8.16 0 004.77 1.52v‑3.4a4.85 4.85 0 01‑1‑.1z"/></svg>`;
     document.getElementById('showUser').innerText = '@username';
     document.getElementById('videos').innerText = '0 videos';
     document.getElementById('followers').innerText = '0 followers';
@@ -642,17 +813,15 @@ async function loadTikTokUser() {
     searchRow.style.display = "none";
     return;
   }
-
   searchNameSpan.innerText = user;
   searchRow.style.display = "block";
-
   try {
-    const resp = await fetch(`${BACKEND_URL}/api/tiktok-rotate?username=${user}`);
+    const resp = await fetch(`${BACKEND_URL}/api/tiktok‑rotate?username=${user}`);
     const data = await resp.json();
     if (data.success === true) {
       currentUserAvatar = data.avatarUrl || "";
       document.getElementById('showUser').innerText = data.nickname || ("@"+user);
-      avatarWrap.innerHTML = `<img src="${currentUserAvatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+      avatarWrap.innerHTML = `<img src="${currentUserAvatar}" style="width:100%;height:100%;border‑radius:50%;object‑fit:cover;">`;
       document.getElementById('videos').innerText = (data.videoCount || 0) + ' videos';
       document.getElementById('followers').innerText = (data.followerCount || 0) + ' followers';
       document.getElementById('following').innerText = (data.followingCount || 0) + ' following';
@@ -663,26 +832,22 @@ async function loadTikTokUser() {
     searchRow.style.display = "none";
   }
 }
-
 async function doLogin() {
   const user = document.getElementById('login_user').value.trim();
   const pwd = document.getElementById('login_pwd').value.trim();
   const errMsg = document.getElementById('err_msg');
-  const loginBtn = document.querySelector(".login-btn");
-
+  const loginBtn = document.querySelector(".login‑btn");
   if (!user || !pwd) {
     errMsg.textContent = "Please enter username and password";
     return;
   }
-
   loginBtn.innerText = "Logging in...";
   loginBtn.disabled = true;
   errMsg.textContent = "";
-
   try {
     const res = await fetch(`${BACKEND_URL}/api/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content‑Type": "application/json" },
       body: JSON.stringify({ 
         username: user, 
         password: pwd,
@@ -690,12 +855,10 @@ async function doLogin() {
       })
     });
     const data = await res.json();
-
     if (data.ok) {
       Storage.set("last_user", user);
       Storage.set("token", data.token);
       currentUsername = user;
-
       const authOk = await checkUserAuth(user);
       if(!authOk){
         loginBtn.innerText = "Login";
@@ -706,17 +869,14 @@ async function doLogin() {
       const usdVal = Number(data.usd_balance);
       const usdStr = `$${usdVal.toFixed(2)}`;
       document.getElementById("balanceUsd").textContent = usdStr;
-      document.getElementById("balanceEqual").innerHTML = `${usdStr} <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">${Number(data.coin_balance).toLocaleString()}</span>`;
+      document.getElementById("balanceEqual").innerHTML = `${usdStr} <span class="coin‑icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">${Number(data.coin_balance).toLocaleString()}</span>`;
       document.getElementById("cardAvailableUsd").textContent = usdStr;
       document.getElementById("cardUpcomingUsd").textContent = `$${(usdVal / 5).toFixed(2)}`;
-
       document.getElementById("loginBox").style.display = "none";
       document.getElementById("app").style.display = "block";
-
       setTimeout(()=>{
         startHeartbeat();
       },1000);
-
     } else {
       errMsg.textContent = data.msg || "Login failed";
       loginBtn.innerText = "Login";
@@ -728,7 +888,6 @@ async function doLogin() {
     loginBtn.disabled = false;
   }
 }
-
 // ========== 删掉 openPaymentModal 跳转支付弹窗 ==========
 function openPaymentModal() {
   if(isCustom){
@@ -743,159 +902,3 @@ function openPaymentModal() {
   document.getElementById("modalCoinText").innerText = `${selectedCoin} Coins`;
   document.getElementById("modalPriceText").innerText = `US$${usdNeed.toFixed(2)}`;
   document.getElementById('paymentModal').style.display = 'flex';
-}
-
-function closePaymentModal() {
-  document.getElementById('paymentModal').style.display = 'none';
-}
-
-function selectPaymentOption(el) {
-  document.querySelectorAll('.payment-option').forEach(option => {
-    option.classList.remove('selected');
-    option.querySelector('input').checked = false;
-  });
-  el.classList.add('selected');
-  el.querySelector('input').checked = true;
-}
-
-function confirmPayment() {
-  const selected = document.querySelector('.payment-option.selected')?.dataset?.method;
-  if (selected === 'applepay') {
-    closePaymentModal();
-    const face = document.getElementById('faceidModal');
-    const video = document.getElementById('faceVideo');
-    const svgBox = document.getElementById('faceSvgBox');
-    face.style.display = 'flex';
-    resetFaceGif();
-    video.style.display = "block";
-    svgBox.style.display = "none";
-    document.querySelector('.faceid-icon').onclick = async function(){
-      playFaceGif();
-      setTimeout(async ()=>{
-        setTimeout(async ()=>{
-          face.style.display = 'none';
-          await runDeductAndFlow();
-        }, 500);
-      },1000);
-    };
-  } else {
-    closePaymentModal();
-    runDeductAndFlow();
-  }
-}
-
-// ✅【新增：Exchange 按钮直接走这里】
-async function submitExchange(){
-  // 校验自定义数量
-  if(isCustom){
-    let val = parseInt(document.getElementById("customCoins").value);
-    if(!val || val <=0){
-      alert("Please input valid coin number");
-      return;
-    }
-    selectedCoin = val;
-  }
-  // 直接扣款，跳过选择支付
-  await runDeductAndFlow();
-}
-
-// 【核心】先调用后端扣款接口，成功才走倒计时成功弹窗
-async function runDeductAndFlow(){
-  const token = Storage.get("token");
-  const username = Storage.get("last_user");
-  if(!token || !username){
-    alert("登录失效，请重新登录");
-    logoutClear();
-    return;
-  }
-
-  try{
-    const deductRes = await fetch(`${BACKEND_URL}/api/deduct-coin`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        username: username,
-        token: token,
-        coinAmount: selectedCoin
-      })
-    });
-    const deductData = await deductRes.json();
-    if(!deductData.ok){
-      alert(deductData.msg);
-      return;
-    }
-    // 扣款成功 → 走倒计时成功流程
-    document.getElementById('popAvatarBg').src = currentUserAvatar;
-    document.getElementById('loadingPop').style.display = 'flex';
-    let t = 3;
-    const timer = setInterval(() => {
-      t--;
-      document.getElementById('countDownText').innerText = "Waiting: " + t + "s";
-      if (t <= 0) {
-        clearInterval(timer);
-        document.getElementById('loadingPop').style.display = 'none';
-        document.getElementById('successPop').style.display = 'flex';
-        document.getElementById('popContent').innerHTML = `
-          <div style="font-size:16px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:6px;">
-            <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span>
-            ${selectedCoin} Coins
-          </div>
-          <div style="font-size:14px; color:#666; margin:4px 0;">$${(selectedCoin/USD_TO_COIN_RATE).toFixed(2)}</div>
-          <div style="font-size:14px; color:#555; margin-top:10px;">Recipient: ${document.getElementById('showUser').innerText}</div>
-        `;
-        // 扣款成功立刻刷新余额
-        refreshBalance();
-      }
-    }, 1000);
-  }catch(err){
-    alert("扣款请求出错，请检查网络");
-    console.error(err);
-  }
-}
-
-// Next 按钮：关闭弹窗，重置页面，从头开始
-function nextResetFlow() {
-  document.getElementById('successPop').style.display = "none";
-  document.getElementById('usernameInp').value = '';
-  document.getElementById('customCoins').value = '';
-  document.getElementById('customCoins').style.display = 'none';
-  isCustom = false;
-  currentUserAvatar = "";
-
-  const avatarWrap = document.getElementById('avatarWrap');
-  avatarWrap.innerHTML = `<svg viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>`;
-  document.getElementById('showUser').innerText = '@username';
-  document.getElementById('videos').innerText = '0 videos';
-  document.getElementById('followers').innerText = '0 followers';
-  document.getElementById('following').innerText = '0 following';
-
-  document.querySelectorAll('.amountItem').forEach(i => i.classList.remove('active'));
-  document.querySelector('.amountItem').classList.add('active');
-  selectedCoin = 250;
-}
-
-window.onload = async function(){
-  renderPriceLabels(); // 加载立刻渲染美金价格
-  const savedUser = Storage.get("last_user");
-  const token = Storage.get("token");
-  if(savedUser && token){
-    document.getElementById("login_user").value = savedUser;
-    const authOk = await checkUserAuth(savedUser);
-    if(authOk){
-      currentUsername = savedUser;
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      refreshBalance();
-      setTimeout(()=>{
-        startHeartbeat();
-      },1000);
-    }
-  }
-  // 右上角 X 关闭蓝色提示卡片
-  document.querySelector('.scaled-notice .close-x').onclick = function(){
-    document.querySelector('.scaled-notice').style.display = 'none';
-  }
-};
-</script>
-</body>
-</html>
