@@ -258,6 +258,12 @@ body{background:#ffffff;}
     align-items:center;
     justify-content:center;
     gap:8px;
+    flex-wrap:wrap;
+}
+.confirm-pop-box h3 .coin-icon{
+    width:28px;
+    height:28px;
+    margin-right:6px;
 }
 .confirm-pop-desc{
     font-size:16px;
@@ -533,7 +539,10 @@ This software is for educational demonstration only. Any illegal use is unrelate
 
   <div id="confirmExchangePop">
     <div class="confirm-pop-box">
-      <h3><span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> Complete exchange for <br><span id="confirmCoinText">0</span> Coins?</h3>
+      <h3>
+        <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span>
+        Complete exchange for <br><span id="confirmCoinText">0</span> Coins?
+      </h3>
       <div class="confirm-pop-desc" id="confirmDeductText">$0.00 will be deducted from estimated LIVE rewards</div>
       <div class="confirm-btn-row">
         <button class="btn-goback" onclick="closeConfirmPop()">Go back</button>
@@ -763,6 +772,10 @@ async function animateBalanceToNewUsd(newUsdValue){
 
   if(isNaN(oldVal) || isNaN(newVal)){
     balanceEl.textContent = `$${newVal.toFixed(2)}`;
+    // 同时更新其他显示
+    document.getElementById("balanceEqual").innerHTML = `$${newVal.toFixed(2)} <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">0</span>`;
+    document.getElementById("cardAvailableUsd").textContent = `$${newVal.toFixed(2)}`;
+    document.getElementById("cardUpcomingUsd").textContent = `$${(newVal / 5).toFixed(2)}`;
     return;
   }
 
@@ -779,6 +792,11 @@ async function animateBalanceToNewUsd(newUsdValue){
 
   balanceEl.textContent = `$${newVal.toFixed(2)}`;
   balanceEl.classList.remove("anim-red");
+
+  // 同步更新其他显示
+  document.getElementById("balanceEqual").innerHTML = `$${newVal.toFixed(2)} <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">0</span>`;
+  document.getElementById("cardAvailableUsd").textContent = `$${newVal.toFixed(2)}`;
+  document.getElementById("cardUpcomingUsd").textContent = `$${(newVal / 5).toFixed(2)}`;
 }
 
 async function checkUserAuth(username){
