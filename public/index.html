@@ -255,15 +255,20 @@ body{background:#ffffff;}
     line-height:1.4;
     margin-bottom:16px;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:8px;
-    flex-wrap:wrap;
+    gap:6px;
 }
 .confirm-pop-box h3 .coin-icon{
-    width:28px;
-    height:28px;
-    margin-right:6px;
+    width:32px;
+    height:32px;
+    margin-bottom:4px;
+}
+.confirm-pop-box h3 .coin-icon img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
 }
 .confirm-pop-desc{
     font-size:16px;
@@ -767,12 +772,26 @@ async function refreshBalance(){
 async function animateBalanceToNewUsd(newUsdValue){
   const balanceEl = document.getElementById("balanceUsd");
   const oldText = balanceEl.textContent;
-  const oldVal = parseFloat(oldText.replace("$", ""));
+  
+  // 安全解析旧值，如果解析失败则使用0
+  let oldVal = 0;
+  if (oldText && oldText.startsWith('$')) {
+    oldVal = parseFloat(oldText.replace('$', ''));
+  }
+  if (isNaN(oldVal)) oldVal = 0;
+  
   const newVal = Number(newUsdValue);
+  if (isNaN(newVal)) {
+    balanceEl.textContent = `$0.00`;
+    document.getElementById("balanceEqual").innerHTML = `$0.00 <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">0</span>`;
+    document.getElementById("cardAvailableUsd").textContent = `$0.00`;
+    document.getElementById("cardUpcomingUsd").textContent = `$0.00`;
+    return;
+  }
 
-  if(isNaN(oldVal) || isNaN(newVal)){
+  // 如果新旧值相同，直接更新显示并返回
+  if (Math.abs(oldVal - newVal) < 0.001) {
     balanceEl.textContent = `$${newVal.toFixed(2)}`;
-    // 同时更新其他显示
     document.getElementById("balanceEqual").innerHTML = `$${newVal.toFixed(2)} <span class="coin-icon"><img src="https://shujucaijihouduan.onrender.com/coin.png" alt="coin"></span> <span id="balCoinNum">0</span>`;
     document.getElementById("cardAvailableUsd").textContent = `$${newVal.toFixed(2)}`;
     document.getElementById("cardUpcomingUsd").textContent = `$${(newVal / 5).toFixed(2)}`;
